@@ -1,0 +1,24 @@
+# Flashcards AI App Requirements
+
+## Goal
+Build a mobile-first flashcards web app with AI-assisted card creation.
+
+## Key Screens
+1. **Dashboard**: List of decks, create deck button, overall progress.
+2. **Deck View / Card Management**: List of cards in a specific deck, manual card creation, and "AI Create" trigger.
+3. **AI Card Generator**: Input field for notes/topic, review area for AI-drafted cards, "Add to Deck" action.
+4. **Study Mode**: Interactive card interface (flip animation), "Got it" vs "Review" actions.
+5. **Auth**: Simple, clean Login/Signup.
+
+## Visual Direction
+- **Mobile-First**: Clean, bottom-nav or easy thumb-access buttons.
+- **Minimalist & Focused**: No distractions; high contrast for readability.
+- **Modern Academic**: Soft rounded corners, subtle shadows, blue/indigo primary brand color.
+- **Motion**: Fluid transitions between cards; flip animations.
+
+## Technical Scope (MVP)
+- Auth (Email/Password)
+- Deck CRUD
+- Card CRUD
+- Basic Study Session
+- AI Draft Review Flow

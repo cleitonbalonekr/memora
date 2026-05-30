@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Study Mode - Flashcards AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#ffdadb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#e2dfff",
+                        "background": "#f7f9fb",
+                        "on-secondary-container": "#00714d",
+                        "surface-container-high": "#e6e8ea",
+                        "primary": "#3525cd",
+                        "surface": "#f7f9fb",
+                        "tertiary-container": "#bf0f3c",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary-fixed": "#0f0069",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#006c49",
+                        "inverse-surface": "#2d3133",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "on-tertiary-fixed": "#40000d",
+                        "surface-variant": "#e0e3e5",
+                        "inverse-primary": "#c3c0ff",
+                        "on-primary-container": "#dad7ff",
+                        "surface-tint": "#4d44e3",
+                        "secondary-container": "#6cf8bb",
+                        "surface-dim": "#d8dadc",
+                        "outline": "#777587",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#95002b",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-surface-variant": "#464555",
+                        "on-tertiary-container": "#ffd0d2",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-fixed": "#002113",
+                        "on-secondary-fixed-variant": "#005236",
+                        "primary-container": "#4f46e5",
+                        "surface-container": "#eceef0",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "rose-primary": "#f43f5e",
+                        "emerald-primary": "#10b981"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1rem"
+                    },
+                    "spacing": {
+                        "max-width-content": "600px",
+                        "xs": "4px",
+                        "base": "4px",
+                        "sm": "8px",
+                        "margin-desktop": "auto",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.background');
+        }
+        
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        .card-shadow {
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased text-on-surface min-h-screen flex flex-col relative overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface/80 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile h-16 max-w-max-width-content mx-auto z-50 fixed top-0 left-0 right-0">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors p-sm rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-sm-mobile text-headline-sm-mobile font-bold text-on-surface truncate px-md">
+            Advanced Cellular Biology
+        </h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</header>
+<!-- Progress Bar (Top of canvas) -->
+<div class="fixed top-16 left-0 right-0 z-40 max-w-max-width-content mx-auto px-margin-mobile pt-sm">
+<div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-300 ease-out w-2/5"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant text-center mt-xs">12 / 30 Cards</p>
+</div>
+<!-- Main Study Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center w-full max-w-max-width-content mx-auto px-margin-mobile pt-24 pb-32 relative">
+<!-- Flashcard Container -->
+<div class="w-full max-w-sm aspect-[3/4] min-h-[320px] relative perspective-1000 cursor-pointer group" onclick="this.querySelector('.flipper').classList.toggle('rotate-y-180')">
+<div class="flipper w-full h-full relative transition-transform duration-500 transform-style-3d shadow-lg rounded-2xl bg-surface-container-lowest border border-surface-container-highest card-shadow">
+<!-- Front of Card -->
+<div class="absolute inset-0 w-full h-full backface-hidden flex flex-col items-center justify-center p-lg text-center rounded-2xl bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-primary mb-md uppercase tracking-wider">Concept</span>
+<h2 class="font-display-lg-mobile text-display-lg-mobile text-on-surface">Endoplasmic Reticulum</h2>
+<p class="font-label-md text-label-md text-on-surface-variant mt-auto pb-sm animate-pulse">Tap to flip</p>
+</div>
+<!-- Back of Card -->
+<div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 flex flex-col items-center justify-center p-lg text-center rounded-2xl bg-surface-container-lowest overflow-y-auto">
+<span class="font-label-sm text-label-sm text-secondary mb-md uppercase tracking-wider">Definition</span>
+<p class="font-body-lg text-body-lg text-on-surface">
+                        A continuous membrane system that forms a series of flattened sacs within the cytoplasm of eukaryotic cells and serves multiple functions, being important particularly in the synthesis, folding, modification, and transport of proteins.
+                    </p>
+</div>
+</div>
+</div>
+</main>
+<!-- Action Buttons (Bottom fixed) -->
+<div class="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-surface to-transparent pb-lg pt-xl px-margin-mobile max-w-max-width-content mx-auto">
+<div class="flex gap-md w-full justify-center max-w-sm mx-auto">
+<!-- Review Again Button -->
+<button class="flex-1 py-md px-sm rounded-xl border-2 border-rose-primary text-rose-primary font-headline-sm-mobile text-headline-sm-mobile font-bold bg-surface-container-lowest hover:bg-rose-50 transition-all active:scale-95 flex flex-col items-center justify-center gap-xs shadow-sm">
+<span class="material-symbols-outlined text-rose-primary" data-icon="replay">replay</span>
+<span>Review</span>
+</button>
+<!-- Got It Button -->
+<button class="flex-1 py-md px-sm rounded-xl bg-emerald-primary text-on-primary font-headline-sm-mobile text-headline-sm-mobile font-bold hover:bg-emerald-600 transition-all active:scale-95 flex flex-col items-center justify-center gap-xs shadow-md">
+<span class="material-symbols-outlined text-on-primary" data-icon="check_circle">check_circle</span>
+<span>Got it</span>
+</button>
+</div>
+</div>
+<!-- Script for subtle interactive effects -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.querySelector('.group');
+            
+            // Add subtle tilt effect on hover for desktop
+            if (window.matchMedia("(min-width: 768px)").matches) {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    
+                    const flipper = card.querySelector('.flipper');
+                    
+                    // Only apply tilt if not flipped
+                    if (!flipper.classList.contains('rotate-y-180')) {
+                        flipper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    } else {
+                        flipper.style.transform = `rotateX(${-rotateX}deg) rotateY(${180 + rotateY}deg)`;
+                    }
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    const flipper = card.querySelector('.flipper');
+                    if (flipper.classList.contains('rotate-y-180')) {
+                         flipper.style.transform = `rotateY(180deg)`;
+                    } else {
+                         flipper.style.transform = `rotateX(0deg) rotateY(0deg)`;
+                    }
+                });
+            }
+        });
+    </script>
+</body></html>

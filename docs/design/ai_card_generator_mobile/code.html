@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Card Generator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-container": "#bf0f3c",
+                        "on-primary-container": "#dad7ff",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#95002b",
+                        "primary-container": "#4f46e5",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-fixed": "#002113",
+                        "surface-tint": "#4d44e3",
+                        "surface-dim": "#d8dadc",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "inverse-primary": "#c3c0ff",
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "primary-fixed": "#e2dfff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#464555",
+                        "on-tertiary-container": "#ffd0d2",
+                        "surface": "#f7f9fb",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary": "#006c49",
+                        "outline-variant": "#c7c4d8",
+                        "on-background": "#191c1e",
+                        "inverse-on-surface": "#eff1f3",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "on-tertiary-fixed": "#40000d",
+                        "on-primary-fixed": "#0f0069",
+                        "tertiary-fixed": "#ffdadb",
+                        "surface-container": "#eceef0",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary": "#3525cd",
+                        "secondary-container": "#6cf8bb",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "outline": "#777587",
+                        "on-secondary-container": "#00714d"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-mobile": "20px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "margin-desktop": "auto",
+                        "max-width-content": "600px",
+                        "xs": "4px",
+                        "base": "4px"
+                    },
+                    fontFamily: {
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "display-lg-mobile": ["28px", { lineHeight: "36px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "label-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "label-md": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3525cd;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3525cd;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased md:bg-surface-container-low min-h-screen relative pb-40">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface shadow-sm md:flex md:justify-center transition-all">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-content mx-margin-desktop">
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 transition-transform duration-200 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile md:font-headline-sm md:text-headline-sm font-bold text-primary">
+                Flashcards AI
+            </h1>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-label-sm font-label-sm shadow-sm overflow-hidden border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-24 px-margin-mobile w-full max-w-content mx-auto flex flex-col gap-lg md:bg-surface md:mt-6 md:rounded-xl md:shadow-md md:p-lg md:min-h-[707px]">
+<!-- Header Section -->
+<section class="flex flex-col gap-sm">
+<h2 class="font-headline-md text-headline-md text-on-surface">Generate Deck</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Paste your notes or provide a topic to let AI draft flashcards instantly.</p>
+</section>
+<!-- Input Section -->
+<section class="flex flex-col gap-sm">
+<div class="relative">
+<textarea class="w-full min-h-[180px] p-md rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none text-body-md font-body-md placeholder-outline shadow-sm" placeholder="e.g. The mitochondria is the powerhouse of the cell. Cellular respiration happens here..."></textarea>
+<div class="absolute bottom-md right-md font-label-sm text-label-sm text-outline">
+                    0 / 1000
+                </div>
+</div>
+<button class="w-full py-md rounded-full bg-primary text-on-primary font-label-md text-label-md mt-sm flex items-center justify-center gap-sm hover:bg-surface-tint active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined text-[18px]" data-icon="auto_awesome">auto_awesome</span>
+                Draft Cards
+            </button>
+</section>
+<!-- Divider -->
+<div class="h-px w-full bg-outline-variant/50 my-2"></div>
+<!-- Review Drafts Section -->
+<section class="flex flex-col gap-md">
+<div class="flex justify-between items-center mb-sm">
+<h3 class="font-headline-sm text-headline-sm-mobile text-on-surface flex items-center gap-xs">
+                    Review Drafts
+                    <span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full font-label-sm text-label-sm ml-2">3</span>
+</h3>
+</div>
+<!-- Draft Card Item 1 -->
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant flex flex-col gap-md transition-all hover:shadow-md group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Card 1</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+<!-- Toggle -->
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out translate-x-5 z-10" id="toggle1" name="toggle1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary cursor-pointer transition-colors duration-200 ease-in-out" for="toggle1"></label>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Question</label>
+<input class="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:border-primary outline-none font-body-md text-body-md transition-all text-on-surface" type="text" value="What is the primary function of the mitochondria?"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Answer</label>
+<textarea class="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:border-primary outline-none font-body-md text-body-md min-h-[60px] resize-none transition-all text-on-surface">It generates most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy.</textarea>
+</div>
+</div>
+</div>
+<!-- Draft Card Item 2 -->
+<div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant flex flex-col gap-md transition-all hover:shadow-md group">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Card 2</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+<!-- Toggle -->
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out translate-x-5 z-10" id="toggle2" name="toggle2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary cursor-pointer transition-colors duration-200 ease-in-out" for="toggle2"></label>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Question</label>
+<input class="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:border-primary outline-none font-body-md text-body-md transition-all text-on-surface" type="text" value="What is the structure of the inner mitochondrial membrane?"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Answer</label>
+<textarea class="w-full p-2 rounded-lg border border-outline-variant bg-surface focus:border-primary outline-none font-body-md text-body-md min-h-[60px] resize-none transition-all text-on-surface">It is highly folded into structures called cristae, which increase the surface area for energy production.</textarea>
+</div>
+</div>
+</div>
+<!-- Draft Card Item 3 (Excluded visually) -->
+<div class="bg-surface-container opacity-60 p-md rounded-xl border border-outline-variant flex flex-col gap-md transition-all">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Card 3</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+<!-- Toggle -->
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out z-10 border-outline-variant" id="toggle3" name="toggle3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-outline-variant cursor-pointer transition-colors duration-200 ease-in-out" for="toggle3"></label>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Question</label>
+<input class="w-full p-2 rounded-lg border border-outline-variant bg-surface-container text-outline outline-none font-body-md text-body-md" disabled="" type="text" value="Who discovered mitochondria?"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Answer</label>
+<textarea class="w-full p-2 rounded-lg border border-outline-variant bg-surface-container text-outline outline-none font-body-md text-body-md min-h-[40px] resize-none" disabled="">Albert von Kölliker in 1857.</textarea>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Footer Action -->
+<div class="fixed bottom-[80px] w-full z-40 bg-gradient-to-t from-surface via-surface to-transparent pt-xl pb-md px-margin-mobile md:hidden pointer-events-none">
+<div class="max-w-content mx-auto pointer-events-auto flex justify-center">
+<button class="w-full max-w-[300px] py-lg rounded-full bg-on-surface text-surface font-headline-sm text-headline-sm-mobile shadow-xl flex items-center justify-center gap-sm active:scale-95 transition-transform hover:bg-on-surface/90">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+                Save 2 Cards to Deck
+            </button>
+</div>
+</div>
+<!-- Desktop static action (hidden on mobile) -->
+<div class="hidden md:flex justify-end max-w-content mx-auto px-lg pb-xl pt-md">
+<button class="px-xl py-md rounded-full bg-on-surface text-surface font-headline-sm text-headline-sm flex items-center justify-center gap-sm active:scale-95 transition-transform hover:bg-on-surface/90 shadow-md">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+            Save 2 Cards to Deck
+        </button>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 backdrop-blur-md rounded-t-xl bg-surface/80 border-t border-outline-variant shadow-lg">
+<div class="flex justify-around items-center h-20 w-full max-w-content mx-margin-desktop px-gutter pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="style">style</span>
+<span class="font-label-sm text-label-sm">Decks</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:opacity-80 transition-opacity active:scale-90 duration-150 w-16" href="#">
+<div class="bg-primary-container/20 p-1 rounded-full mb-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" data-weight="fill" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">AI Create</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple script to toggle active state visually for the custom toggles
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const card = this.closest('.group, .opacity-60');
+                const label = this.nextElementSibling;
+                
+                if(this.checked) {
+                    this.classList.replace('translate-x-0', 'translate-x-5');
+                    this.classList.replace('border-outline-variant', 'border-primary');
+                    label.classList.replace('bg-outline-variant', 'bg-primary');
+                    
+                    if(card) {
+                        card.classList.replace('opacity-60', 'group');
+                        card.classList.replace('bg-surface-container', 'bg-surface-container-lowest');
+                        card.classList.add('shadow-sm', 'hover:shadow-md');
+                        const inputs = card.querySelectorAll('input[type="text"], textarea');
+                        inputs.forEach(i => {
+                            i.disabled = false;
+                            i.classList.replace('bg-surface-container', 'bg-surface');
+                            i.classList.replace('text-outline', 'text-on-surface');
+                        });
+                        const dragText = card.querySelector('.text-outline.uppercase');
+                        if(dragText) dragText.classList.replace('text-outline', 'text-primary');
+                    }
+                } else {
+                    this.classList.replace('translate-x-5', 'translate-x-0');
+                    this.classList.replace('border-primary', 'border-outline-variant');
+                    label.classList.replace('bg-primary', 'bg-outline-variant');
+                    
+                    if(card) {
+                        card.classList.replace('group', 'opacity-60');
+                        card.classList.replace('bg-surface-container-lowest', 'bg-surface-container');
+                        card.classList.remove('shadow-sm', 'hover:shadow-md');
+                        const inputs = card.querySelectorAll('input[type="text"], textarea');
+                        inputs.forEach(i => {
+                            i.disabled = true;
+                            i.classList.replace('bg-surface', 'bg-surface-container');
+                            i.classList.replace('text-on-surface', 'text-outline');
+                        });
+                        const dragText = card.querySelector('.text-primary.uppercase');
+                        if(dragText) dragText.classList.replace('text-primary', 'text-outline');
+                    }
+                }
+            });
+        });
+    </script>
+</body></html>

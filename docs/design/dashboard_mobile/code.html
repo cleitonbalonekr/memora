@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashcards AI - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e0e3e5",
+                    "tertiary-container": "#bf0f3c",
+                    "on-primary-container": "#dad7ff",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#f7f9fb",
+                    "on-surface": "#191c1e",
+                    "tertiary": "#95002b",
+                    "primary-container": "#4f46e5",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-secondary-fixed": "#002113",
+                    "surface-tint": "#4d44e3",
+                    "surface-dim": "#d8dadc",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "inverse-primary": "#c3c0ff",
+                    "background": "#f7f9fb",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "primary-fixed": "#e2dfff",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#464555",
+                    "on-tertiary-container": "#ffd0d2",
+                    "surface": "#f7f9fb",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary": "#006c49",
+                    "outline-variant": "#c7c4d8",
+                    "on-background": "#191c1e",
+                    "inverse-on-surface": "#eff1f3",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f2f4f6",
+                    "on-tertiary-fixed-variant": "#92002a",
+                    "on-tertiary-fixed": "#40000d",
+                    "on-primary-fixed": "#0f0069",
+                    "tertiary-fixed": "#ffdadb",
+                    "surface-container": "#eceef0",
+                    "secondary-fixed-dim": "#4edea3",
+                    "primary": "#3525cd",
+                    "secondary-container": "#6cf8bb",
+                    "tertiary-fixed-dim": "#ffb2b7",
+                    "outline": "#777587",
+                    "on-secondary-container": "#00714d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "20px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "margin-desktop": "auto",
+                    "max-width-content": "600px",
+                    "xs": "4px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        .pt-safe { padding-top: env(safe-area-inset-top, 20px); }
+        
+        /* Custom scrollbar for horizontal lists if needed */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased w-full h-full min-h-screen flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface shadow-sm md:hidden">
+<div class="flex justify-between items-center px-margin-mobile h-16 w-full max-w-content mx-margin-desktop pt-safe">
+<button class="text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 duration-200 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm-mobile font-bold text-primary">Flashcards AI</h1>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center shadow-sm">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a young professional in a brightly lit studio. The person is smiling gently, wearing a clean white shirt against a soft, out-of-focus background. The lighting is high-key and flattering, emphasizing a clean, modern aesthetic suitable for a professional educational application avatar. Deep blacks and pristine whites dominate the color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbEfsiv42ta8fHg880gy6AE1CMLfvF6ekWR8B08OuWjsHfkjn3v4Wj2k8Crl_v-j-nNfb3sdF8vlx5tdu_8tx3qcYg3qLL6UMYmT4eVKW-Wuoa492Ggu6Otc712Ngg26-tZt4HX7fHMiFv72ALMCceOgym1UeTYGwBDuwWymt2DJsMhE4_54FkLGOche7iS9s9JE1_au210Pgs-Eh62nb6eIFuxAiUkfy27Jmg77Lb0pmfLOTogDIGNlATvDWew35zCMDr8JaqHdR7"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-[600px] mx-auto px-margin-mobile pt-24 pb-32 flex flex-col gap-lg">
+<!-- Welcome Section -->
+<section class="flex flex-col gap-sm">
+<h2 class="font-display-lg-mobile text-display-lg-mobile text-on-surface">Welcome back, Alex</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Ready to crush your study goals today?</p>
+</section>
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-2 gap-md">
+<!-- Streak Card -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col gap-sm justify-between">
+<div class="flex items-center gap-sm text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Current Streak</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-display-lg-mobile text-display-lg-mobile text-on-surface">14</span>
+<span class="font-body-md text-body-md text-on-surface-variant">days</span>
+</div>
+</div>
+<!-- Cards Studied Card -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col gap-sm justify-between">
+<div class="flex items-center gap-sm text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">style</span>
+<span class="font-label-md text-label-md uppercase tracking-wider">Studied Today</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-display-lg-mobile text-display-lg-mobile text-on-surface">42</span>
+<span class="font-body-md text-body-md text-on-surface-variant">cards</span>
+</div>
+</div>
+</section>
+<!-- Recent Decks Section -->
+<section class="flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-sm text-headline-sm-mobile text-on-surface">Recent Decks</h3>
+<button class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors">See All</button>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Deck 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">science</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm-mobile text-on-surface">Biology 101</span>
+<span class="font-body-md text-body-md text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                                12 cards due
+                            </span>
+</div>
+</div>
+<!-- Progress Circle -->
+<div class="relative w-12 h-12">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<!-- Progress Circle -->
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-surface font-bold">
+                            75%
+                        </div>
+</div>
+</div>
+<!-- Deck 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">translate</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm-mobile text-on-surface">Spanish Vocab</span>
+<span class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                Up to date
+                            </span>
+</div>
+</div>
+<!-- Progress Circle -->
+<div class="relative w-12 h-12">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-surface font-bold">
+                            100%
+                        </div>
+</div>
+</div>
+<!-- Deck 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0px_4px_20px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex items-center justify-between active:scale-[0.98] transition-transform cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">public</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm-mobile text-on-surface">World History</span>
+<span class="font-body-md text-body-md text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                                28 cards due
+                            </span>
+</div>
+</div>
+<!-- Progress Circle -->
+<div class="relative w-12 h-12">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="100, 100" stroke-width="3"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="45, 100" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-surface font-bold">
+                            45%
+                        </div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed right-margin-mobile bottom-[100px] z-[60] w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center active:scale-90 transition-transform md:hidden">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 0;">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-md rounded-t-xl md:hidden">
+<div class="flex justify-around items-center h-20 w-full max-w-content mx-margin-desktop px-gutter pb-safe">
+<!-- Dashboard (Active) -->
+<button class="flex flex-col items-center justify-center text-primary font-bold hover:opacity-80 transition-opacity active:scale-90 duration-150 gap-1 w-16">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</button>
+<!-- Decks -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 gap-1 w-16">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">style</span>
+<span class="font-label-sm text-label-sm">Decks</span>
+</button>
+<!-- AI Create -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 gap-1 w-16">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">auto_awesome</span>
+<span class="font-label-sm text-label-sm">AI Create</span>
+</button>
+<!-- Profile -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:opacity-80 transition-opacity active:scale-90 duration-150 gap-1 w-16">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</div>
+</nav>
+<!-- Desktop Sidebar Stub (hidden on mobile) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full w-80 bg-surface shadow-xl rounded-r-xl flex-col py-lg z-50">
+<div class="px-lg pb-md mb-md border-b border-outline-variant/20 flex items-center gap-md">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center shadow-sm">
+<img alt="User avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a young professional in a brightly lit studio. The person is smiling gently, wearing a clean white shirt against a soft, out-of-focus background. The lighting is high-key and flattering, emphasizing a clean, modern aesthetic suitable for a professional educational application avatar. Deep blacks and pristine whites dominate the color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBo6VLFGLHLAbhTuR-F6E6jMpd9qwDtm-Nx-_zUJf9IVBMOzBPlHD_u9E77G2KcIRzah_nuz6XcQsyebyhk0lAZ2kaqOP83WQmOOckSRhLO931hLb7u3e_YGaP_AYyRILp8jOv5eIggcx0kchtGauNe95j_2LmI24ZFGFiY1iaFaos9lzEO83hfvotxKXqLZUZZqwfrIshY2z-NITTWZXg8D6unZSyIok3lK4aVX8zuQopKx-h35ezXLA7U8sw5f-q-IjoI85-07B8"/>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Academic Pro</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Lifelong Learner</p>
+<p class="font-label-sm text-label-sm text-primary mt-1">Premium Plan</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<!-- Home (Active) -->
+<button class="w-[calc(100%-16px)] bg-primary-container text-on-primary-container rounded-full mx-2 px-4 py-3 flex items-center gap-3 active:scale-[0.98] transition-all mb-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-body-md text-body-md font-bold">Home</span>
+</button>
+<!-- Recent Decks -->
+<button class="w-[calc(100%-16px)] text-on-surface-variant hover:bg-surface-container-high transition-colors mx-2 px-4 py-3 flex items-center gap-3 active:scale-[0.98] mb-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+<span class="font-body-md text-body-md">Recent Decks</span>
+</button>
+<!-- AI Generator -->
+<button class="w-[calc(100%-16px)] text-on-surface-variant hover:bg-surface-container-high transition-colors mx-2 px-4 py-3 flex items-center gap-3 active:scale-[0.98] mb-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">psychology</span>
+<span class="font-body-md text-body-md">AI Generator</span>
+</button>
+<!-- Settings -->
+<button class="w-[calc(100%-16px)] text-on-surface-variant hover:bg-surface-container-high transition-colors mx-2 px-4 py-3 flex items-center gap-3 active:scale-[0.98] mb-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</button>
+<!-- Help -->
+<button class="w-[calc(100%-16px)] text-on-surface-variant hover:bg-surface-container-high transition-colors mx-2 px-4 py-3 flex items-center gap-3 active:scale-[0.98] mb-2 rounded-full mt-auto">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+<span class="font-body-md text-body-md">Help</span>
+</button>
+</div>
+</nav>
+</body></html>
