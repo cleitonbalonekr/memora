@@ -16,14 +16,19 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             );
+            Object.entries(headers).forEach(([key, value]) => {
+              // Server Components cannot mutate response headers.
+              void key;
+              void value;
+            });
           } catch {
             // The `setAll` method can be called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // This can be ignored if Proxy refreshes user sessions.
           }
         },
       },

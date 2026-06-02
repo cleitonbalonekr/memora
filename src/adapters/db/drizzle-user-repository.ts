@@ -21,6 +21,30 @@ export class DrizzleUserRepository implements UserRepository {
     };
   }
 
+  async ensureProfile(input: CreateUserProfileInput): Promise<UserProfile> {
+    const [row] = await db
+      .insert(profiles)
+      .values({
+        id: input.id,
+        email: input.email,
+      })
+      .onConflictDoUpdate({
+        target: profiles.id,
+        set: {
+          email: input.email,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+
+    return {
+      id: row.id,
+      email: row.email,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  }
+
   async findProfileById(id: string): Promise<UserProfile | null> {
     const [row] = await db
       .select()

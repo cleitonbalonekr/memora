@@ -51,7 +51,7 @@
   --color-surface-variant: #e0e3e5;
 
   /* Typography / Font sizes & families */
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --font-size-display-lg: 32px;
   --font-size-display-lg-mobile: 28px;

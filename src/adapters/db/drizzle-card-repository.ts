@@ -1,7 +1,7 @@
 import { CardRepository, Card, CreateCardInput, UpdateCardInput } from "@/ports/card-repository";
 import { db } from "./index";
 import { cards, decks } from "./schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 export class DrizzleCardRepository implements CardRepository {
   async create(input: CreateCardInput, userId: string): Promise<Card> {
@@ -91,21 +91,29 @@ export class DrizzleCardRepository implements CardRepository {
   }
 
   async update(id: string, userId: string, input: UpdateCardInput): Promise<Card> {
-    // 1. Verify card ownership
-    const currentCard = await this.findById(id, userId);
-    if (!currentCard) {
-      throw new Error("Card not found or unauthorized");
-    }
-
-    // 2. Update card
     const [row] = await db
       .update(cards)
       .set({
         ...input,
         updatedAt: new Date(),
       })
-      .where(eq(cards.id, id))
+      .where(
+        and(
+          eq(cards.id, id),
+          inArray(
+            cards.deckId,
+            db
+              .select({ id: decks.id })
+              .from(decks)
+              .where(eq(decks.userId, userId))
+          )
+        )
+      )
       .returning();
+
+    if (!row) {
+      throw new Error("Card not found or unauthorized");
+    }
 
     return {
       id: row.id,
@@ -118,13 +126,24 @@ export class DrizzleCardRepository implements CardRepository {
   }
 
   async delete(id: string, userId: string): Promise<void> {
-    // 1. Verify card ownership
-    const currentCard = await this.findById(id, userId);
-    if (!currentCard) {
+    const rows = await db
+      .delete(cards)
+      .where(
+        and(
+          eq(cards.id, id),
+          inArray(
+            cards.deckId,
+            db
+              .select({ id: decks.id })
+              .from(decks)
+              .where(eq(decks.userId, userId))
+          )
+        )
+      )
+      .returning({ id: cards.id });
+
+    if (rows.length === 0) {
       throw new Error("Card not found or unauthorized");
     }
-
-    // 2. Delete card
-    await db.delete(cards).where(eq(cards.id, id));
   }
 }

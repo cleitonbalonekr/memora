@@ -1,6 +1,7 @@
 export interface SessionUser {
   id: string;
   email: string;
+  needsEmailConfirmation?: boolean;
 }
 
 export interface AuthGateway {

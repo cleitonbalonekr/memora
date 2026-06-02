@@ -20,6 +20,7 @@ export class SupabaseAuthGateway implements AuthGateway {
     return {
       id: data.user.id,
       email: data.user.email || email,
+      needsEmailConfirmation: data.session === null,
     };
   }
 

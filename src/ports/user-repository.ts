@@ -12,6 +12,7 @@ export interface CreateUserProfileInput {
 
 export interface UserRepository {
   createProfile(input: CreateUserProfileInput): Promise<UserProfile>;
+  ensureProfile(input: CreateUserProfileInput): Promise<UserProfile>;
   findProfileById(id: string): Promise<UserProfile | null>;
   findProfileByEmail(email: string): Promise<UserProfile | null>;
 }
