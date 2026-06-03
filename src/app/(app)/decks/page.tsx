@@ -1,13 +1,9 @@
-import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
-import { SupabaseAuthGateway } from "@/adapters/auth/supabase-auth-gateway";
+import { getAuthGateway, getDeckRepository } from "@/composition-root";
 import { LogoutButton } from "@/features/auth/ui/logout-button";
 import { listDecks } from "@/features/decks/use-cases/list-decks";
 
 export default async function DecksPage() {
-  const decks = await listDecks(
-    new SupabaseAuthGateway(),
-    new DrizzleDeckRepository()
-  );
+  const decks = await listDecks(getAuthGateway(), getDeckRepository());
 
   return (
     <main className="min-h-dvh bg-surface px-margin-mobile py-lg text-on-surface">

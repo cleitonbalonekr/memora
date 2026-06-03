@@ -1,8 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { SupabaseAuthGateway } from "@/adapters/auth/supabase-auth-gateway";
-import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
+import { getAuthGateway, getUserRepository } from "@/composition-root";
 import { loginUser } from "@/features/auth/use-cases/login-user";
 import { logoutUser } from "@/features/auth/use-cases/logout-user";
 import { registerUser } from "@/features/auth/use-cases/register-user";
@@ -15,8 +14,8 @@ export async function signUpAction(
 ): Promise<FormState> {
   const result = await registerUser(
     formData,
-    new SupabaseAuthGateway(),
-    new DrizzleUserRepository()
+    getAuthGateway(),
+    getUserRepository()
   );
 
   switch (result.status) {
@@ -45,11 +44,7 @@ export async function logInAction(
   _state: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const result = await loginUser(
-    formData,
-    new SupabaseAuthGateway(),
-    new DrizzleUserRepository()
-  );
+  const result = await loginUser(formData, getAuthGateway(), getUserRepository());
 
   switch (result.status) {
     case "success":
@@ -74,6 +69,6 @@ export async function logInAction(
 }
 
 export async function logOutAction(): Promise<void> {
-  await logoutUser(new SupabaseAuthGateway());
+  await logoutUser(getAuthGateway());
   redirect("/log-in");
 }
