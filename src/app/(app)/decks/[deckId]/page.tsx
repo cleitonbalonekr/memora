@@ -41,6 +41,14 @@ export default async function DeckPage({ params }: DeckPageProps) {
               </p>
             ) : null}
           </div>
+          {cards.length > 0 ? (
+            <Link
+              className="flex h-14 w-full items-center justify-center rounded-xl bg-secondary px-md text-headline-sm text-on-secondary shadow-level1 transition hover:bg-secondary-fixed active:scale-95"
+              href={`/decks/${deck.id}/study`}
+            >
+              Study now
+            </Link>
+          ) : null}
           <div className="flex gap-md">
             <Link
               className="flex h-12 flex-1 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
