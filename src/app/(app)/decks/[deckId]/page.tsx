@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteDeckAction } from "@/app/(app)/decks/actions";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
+import {
+  getAuthGateway,
+  getCardRepository,
+  getDeckRepository,
+} from "@/composition-root";
+import { CardList } from "@/features/cards/ui/card-list";
+import { listCards } from "@/features/cards/use-cases/list-cards";
 import { DeleteDeckButton } from "@/features/decks/ui/delete-deck-button";
 import { getDeck } from "@/features/decks/use-cases/get-deck";
 
@@ -17,6 +23,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
     notFound();
   }
 
+  const cards = await listCards(deck.id, getAuthGateway(), getCardRepository());
   const deleteAction = deleteDeckAction.bind(null, deck.id);
 
   return (
@@ -47,13 +54,19 @@ export default async function DeckPage({ params }: DeckPageProps) {
           </div>
         </header>
 
-        <section className="rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-md">
-          <div className="flex min-h-[140px] flex-col justify-center gap-sm text-center">
-            <h2 className="text-headline-sm">No cards yet</h2>
-            <p className="text-body-md text-on-surface-variant">
-              Card creation lands in the next epic.
-            </p>
+        <section className="flex flex-col gap-md">
+          <div className="flex items-center justify-between gap-md">
+            <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
+              All cards
+            </h2>
+            <Link
+              className="flex h-10 items-center justify-center rounded-xl bg-primary px-md text-label-md text-on-primary shadow-level1 transition hover:bg-surface-tint"
+              href={`/decks/${deck.id}/cards/new`}
+            >
+              Add card
+            </Link>
           </div>
+          <CardList cards={cards} />
         </section>
       </div>
     </main>

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { FormState, initialFormState } from "@/shared/actions/form-state";
 import { FormField } from "@/shared/ui/form-field";
+import { TextAreaField } from "@/shared/ui/text-area-field";
 import {
   DECK_DESCRIPTION_MAX,
   DECK_TITLE_MAX,
@@ -39,28 +40,15 @@ export function DeckForm({
         placeholder="Anatomy 101"
         required
       />
-      <div className="flex flex-col gap-xs">
-        <label className="text-label-sm text-on-surface" htmlFor="description">
-          Description (optional)
-        </label>
-        <textarea
-          aria-describedby={
-            state.fieldErrors?.description ? "description-error" : undefined
-          }
-          aria-invalid={Boolean(state.fieldErrors?.description)}
-          className="min-h-24 w-full rounded-lg border border-outline-variant bg-surface px-sm py-sm text-body-md text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
-          defaultValue={defaultValues?.description}
-          id="description"
-          maxLength={DECK_DESCRIPTION_MAX}
-          name="description"
-          placeholder="What is this deck about?"
-        />
-        {state.fieldErrors?.description ? (
-          <p className="text-label-sm text-error" id="description-error">
-            {state.fieldErrors.description}
-          </p>
-        ) : null}
-      </div>
+      <TextAreaField
+        defaultValue={defaultValues?.description}
+        error={state.fieldErrors?.description}
+        id="description"
+        label="Description (optional)"
+        maxLength={DECK_DESCRIPTION_MAX}
+        name="description"
+        placeholder="What is this deck about?"
+      />
       {state.message ? (
         <p className="text-label-md text-error">{state.message}</p>
       ) : null}

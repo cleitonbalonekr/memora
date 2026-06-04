@@ -1,7 +1,9 @@
 import { SupabaseAuthGateway } from "@/adapters/auth/supabase-auth-gateway";
+import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { AuthGateway } from "@/ports/auth-gateway";
+import { CardRepository } from "@/ports/card-repository";
 import { DeckRepository } from "@/ports/deck-repository";
 import { UserRepository } from "@/ports/user-repository";
 
@@ -13,10 +15,15 @@ import { UserRepository } from "@/ports/user-repository";
 // Repositories are stateless and lean on the process-wide Drizzle client, so a
 // single shared instance is reused across requests.
 const deckRepository = new DrizzleDeckRepository();
+const cardRepository = new DrizzleCardRepository();
 const userRepository = new DrizzleUserRepository();
 
 export function getDeckRepository(): DeckRepository {
   return deckRepository;
+}
+
+export function getCardRepository(): CardRepository {
+  return cardRepository;
 }
 
 export function getUserRepository(): UserRepository {
