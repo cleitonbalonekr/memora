@@ -45,7 +45,6 @@ export async function logInAction(
   formData: FormData
 ): Promise<FormState> {
   const result = await loginUser(formData, getAuthGateway(), getUserRepository());
-
   switch (result.status) {
     case "success":
       redirect(getSafeNextPath(formData.get("next")));

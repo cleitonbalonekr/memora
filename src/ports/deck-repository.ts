@@ -15,7 +15,8 @@ export interface CreateDeckInput {
 
 export interface UpdateDeckInput {
   title?: string;
-  description?: string;
+  // null clears the description; undefined leaves it unchanged.
+  description?: string | null;
 }
 
 export interface DeckRepository {

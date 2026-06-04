@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { logInAction } from "@/app/(auth)/actions";
 import { initialFormState } from "@/shared/actions/form-state";
-import { FormField } from "./form-field";
+import { FormField } from "@/shared/ui/form-field";
 
 interface LogInFormProps {
   nextPath: string;
@@ -11,7 +11,6 @@ interface LogInFormProps {
 
 export function LogInForm({ nextPath }: LogInFormProps) {
   const [state, action, isPending] = useActionState(logInAction, initialFormState);
-
   return (
     <form action={action} className="flex w-full flex-col gap-md rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-md shadow-level1">
       <input name="next" type="hidden" value={nextPath} />

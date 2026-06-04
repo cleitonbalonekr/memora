@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { signUpAction } from "@/app/(auth)/actions";
 import { initialFormState } from "@/shared/actions/form-state";
-import { FormField } from "./form-field";
+import { FormField } from "@/shared/ui/form-field";
 
 interface SignUpFormProps {
   nextPath: string;
