@@ -67,12 +67,20 @@ export default async function DeckPage({ params }: DeckPageProps) {
             <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
               All cards
             </h2>
-            <Link
-              className="flex h-10 items-center justify-center rounded-xl bg-primary px-md text-label-md text-on-primary shadow-level1 transition hover:bg-surface-tint"
-              href={`/decks/${deck.id}/cards/new`}
-            >
-              Add card
-            </Link>
+            <div className="flex gap-sm">
+              <Link
+                className="flex h-10 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
+                href={`/decks/${deck.id}/generate`}
+              >
+                Generate with AI
+              </Link>
+              <Link
+                className="flex h-10 items-center justify-center rounded-xl bg-primary px-md text-label-md text-on-primary shadow-level1 transition hover:bg-surface-tint"
+                href={`/decks/${deck.id}/cards/new`}
+              >
+                Add card
+              </Link>
+            </div>
           </div>
           <CardList cards={cards} />
         </section>

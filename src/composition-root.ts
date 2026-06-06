@@ -2,9 +2,13 @@ import { SupabaseAuthGateway } from "@/adapters/auth/supabase-auth-gateway";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
+import { InMemoryRateLimiter } from "@/adapters/ai/in-memory-rate-limiter";
+import { OpenRouterCardGenerator } from "@/adapters/ai/openrouter-card-generator";
+import { AiCardGenerator } from "@/ports/ai-card-generator";
 import { AuthGateway } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
 import { DeckRepository } from "@/ports/deck-repository";
+import { RateLimiter } from "@/ports/rate-limiter";
 import { UserRepository } from "@/ports/user-repository";
 
 // Composition root: the single place where ports are bound to concrete
@@ -34,4 +38,19 @@ export function getUserRepository(): UserRepository {
 // instance is created on each resolution.
 export function getAuthGateway(): AuthGateway {
   return new SupabaseAuthGateway();
+}
+
+// Shared singleton: the in-memory rate limiter holds per-user counters in
+// process memory, so it must be the same instance across requests to enforce
+// the window (design D7).
+const rateLimiter = new InMemoryRateLimiter();
+
+export function getRateLimiter(): RateLimiter {
+  return rateLimiter;
+}
+
+// Constructed lazily so OPENROUTER_API_KEY is only required where AI generation
+// is actually used (the config asserts the key at construction).
+export function getAiCardGenerator(): AiCardGenerator {
+  return new OpenRouterCardGenerator();
 }
