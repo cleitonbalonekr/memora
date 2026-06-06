@@ -1,8 +1,8 @@
 import { AiCardGenerator } from "@/ports/ai-card-generator";
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { DeckRepository } from "@/ports/deck-repository";
 import { RateLimiter } from "@/ports/rate-limiter";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { validateDrafts } from "@/features/ai/domain/draft-validator";
 import { GenerateDraftsResult, mapGenerateError } from "./draft-errors";
 
@@ -13,54 +13,63 @@ export const TOPIC_OR_NOTES_MAX = 5000;
 // validator so the provider can never blow past it.
 export const MAX_DRAFTS = 10;
 
-export interface GenerateCardDraftsDeps {
-  authGateway: AuthGateway;
-  deckRepository: DeckRepository;
-  rateLimiter: RateLimiter;
-  aiCardGenerator: AiCardGenerator;
+export interface GenerateCardDraftsInput {
+  deckId: string;
+  topicOrNotes: string;
 }
 
-export async function generateCardDrafts(
-  deckId: string,
-  topicOrNotes: string,
-  deps: GenerateCardDraftsDeps,
-): Promise<GenerateDraftsResult> {
-  const user = await requireCurrentUser(deps.authGateway);
-
-  const trimmed = topicOrNotes.trim();
-  if (trimmed.length === 0) {
-    return { status: "invalid_input", message: "Enter a topic or paste some notes." };
-  }
-  if (trimmed.length > TOPIC_OR_NOTES_MAX) {
-    return {
-      status: "invalid_input",
-      message: `Use at most ${TOPIC_OR_NOTES_MAX} characters.`,
-    };
+export class GenerateCardDrafts extends AuthedUseCase<
+  GenerateCardDraftsInput,
+  GenerateDraftsResult
+> {
+  constructor(
+    auth: AuthGateway,
+    private readonly decks: DeckRepository,
+    private readonly rateLimiter: RateLimiter,
+    private readonly aiCardGenerator: AiCardGenerator,
+  ) {
+    super(auth);
   }
 
-  // Ownership check before any cost is incurred: a deck the user does not own
-  // reads as not_found and never reaches the rate limiter or provider.
-  const deck = await deps.deckRepository.findById(deckId, user.id);
-  if (!deck) {
-    return { status: "not_found" };
-  }
+  protected async handle(
+    user: SessionUser,
+    { deckId, topicOrNotes }: GenerateCardDraftsInput,
+  ): Promise<GenerateDraftsResult> {
+    const trimmed = topicOrNotes.trim();
+    if (trimmed.length === 0) {
+      return { status: "invalid_input", message: "Enter a topic or paste some notes." };
+    }
+    if (trimmed.length > TOPIC_OR_NOTES_MAX) {
+      return {
+        status: "invalid_input",
+        message: `Use at most ${TOPIC_OR_NOTES_MAX} characters.`,
+      };
+    }
 
-  const rateCheck = deps.rateLimiter.check(user.id);
-  if (!rateCheck.allowed) {
-    return {
-      status: "rate_limited",
-      retryAfterSeconds: rateCheck.retryAfterSeconds,
-      message: retryMessage(rateCheck.retryAfterSeconds),
-    };
-  }
+    // Ownership check before any cost is incurred: a deck the user does not own
+    // reads as not_found and never reaches the rate limiter or provider.
+    const deck = await this.decks.findById(deckId, user.id);
+    if (!deck) {
+      return { status: "not_found" };
+    }
 
-  try {
-    const rawDrafts = await deps.aiCardGenerator.generateDrafts({
+    const rateCheck = this.rateLimiter.check(user.id);
+    if (!rateCheck.allowed) {
+      return {
+        status: "rate_limited",
+        retryAfterSeconds: rateCheck.retryAfterSeconds,
+        message: retryMessage(rateCheck.retryAfterSeconds),
+      };
+    }
+
+    const rawDrafts = await this.aiCardGenerator.generateDrafts({
       topicOrNotes: trimmed,
       maxDrafts: MAX_DRAFTS,
     });
     return { status: "success", drafts: validateDrafts(rawDrafts, MAX_DRAFTS) };
-  } catch (error) {
+  }
+
+  protected mapError(error: unknown): GenerateDraftsResult {
     return mapGenerateError(error);
   }
 }

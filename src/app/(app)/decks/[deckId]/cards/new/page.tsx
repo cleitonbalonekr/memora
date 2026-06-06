@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createCardAction } from "@/app/(app)/decks/[deckId]/cards/actions";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
+import { getDeck } from "@/composition-root";
 import { CardForm } from "@/features/cards/ui/card-form";
-import { getDeck } from "@/features/decks/use-cases/get-deck";
 
 interface NewCardPageProps {
   params: Promise<{ deckId: string }>;
@@ -11,7 +10,7 @@ interface NewCardPageProps {
 
 export default async function NewCardPage({ params }: NewCardPageProps) {
   const { deckId } = await params;
-  const deck = await getDeck(deckId, getAuthGateway(), getDeckRepository());
+  const deck = await getDeck().execute(deckId);
 
   if (!deck) {
     notFound();

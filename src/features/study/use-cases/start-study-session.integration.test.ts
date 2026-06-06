@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { startStudySession } from "./start-study-session";
+import { StartStudySession } from "./start-study-session";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
@@ -31,7 +31,7 @@ describe("startStudySession", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const cards = await startStudySession(deck.id, auth, cardRepository);
+    const cards = await new StartStudySession(auth, cardRepository).execute(deck.id);
 
     expect(cards.map((card) => card.frontText)).toEqual(["First?", "Second?"]);
     expect(cards[0]).toHaveProperty("id");
@@ -46,9 +46,9 @@ describe("startStudySession", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    await expect(startStudySession(deck.id, auth, cardRepository)).rejects.toThrow(
-      "not found or unauthorized",
-    );
+    await expect(
+      new StartStudySession(auth, cardRepository).execute(deck.id),
+    ).rejects.toThrow("not found or unauthorized");
   });
 
   it("returns an empty list for a deck with no cards", async () => {
@@ -58,6 +58,8 @@ describe("startStudySession", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    expect(await startStudySession(deck.id, auth, cardRepository)).toEqual([]);
+    expect(await new StartStudySession(auth, cardRepository).execute(deck.id)).toEqual(
+      [],
+    );
   });
 });

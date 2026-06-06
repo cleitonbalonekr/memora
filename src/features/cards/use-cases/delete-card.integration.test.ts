@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deleteCard } from "./delete-card";
+import { DeleteCard } from "./delete-card";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
@@ -27,7 +27,7 @@ describe("deleteCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await deleteCard(card.id, auth, cardRepository);
+    const result = await new DeleteCard(auth, cardRepository).execute(card.id);
 
     expect(result.status).toBe("success");
     expect(await cardRepository.findById(card.id, ownerId)).toBeNull();
@@ -45,7 +45,7 @@ describe("deleteCard", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    const result = await deleteCard(card.id, auth, cardRepository);
+    const result = await new DeleteCard(auth, cardRepository).execute(card.id);
 
     expect(result.status).toBe("not_found");
     expect(await cardRepository.findById(card.id, ownerId)).not.toBeNull();

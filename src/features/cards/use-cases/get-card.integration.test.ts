@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCard } from "./get-card";
+import { GetCard } from "./get-card";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
@@ -27,7 +27,7 @@ describe("getCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const found = await getCard(card.id, auth, cardRepository);
+    const found = await new GetCard(auth, cardRepository).execute(card.id);
 
     expect(found?.id).toBe(card.id);
     expect(found?.frontText).toBe("What is the femur?");
@@ -45,6 +45,6 @@ describe("getCard", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    expect(await getCard(card.id, auth, cardRepository)).toBeNull();
+    expect(await new GetCard(auth, cardRepository).execute(card.id)).toBeNull();
   });
 });

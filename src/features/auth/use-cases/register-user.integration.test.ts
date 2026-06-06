@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { registerUser } from "./register-user";
+import { RegisterUser } from "./register-user";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
 
@@ -19,10 +19,8 @@ describe("registerUser", () => {
       signUpResult: { id, email: "new@example.com" },
     });
 
-    const result = await registerUser(
+    const result = await new RegisterUser(auth, userRepository).execute(
       signUpForm("new@example.com", "Password1"),
-      auth,
-      userRepository,
     );
 
     expect(result).toEqual({
@@ -46,10 +44,8 @@ describe("registerUser", () => {
       },
     });
 
-    const result = await registerUser(
+    const result = await new RegisterUser(auth, userRepository).execute(
       signUpForm("confirm@example.com", "Password1"),
-      auth,
-      userRepository,
     );
 
     expect(result).toEqual({ status: "check_email", email: "confirm@example.com" });
@@ -59,10 +55,8 @@ describe("registerUser", () => {
   it("rejects invalid input before calling the auth provider", async () => {
     const auth = new FakeAuthGateway();
 
-    const result = await registerUser(
+    const result = await new RegisterUser(auth, userRepository).execute(
       signUpForm("bad-email", "weak"),
-      auth,
-      userRepository,
     );
 
     expect(result.status).toBe("invalid_input");
@@ -74,10 +68,8 @@ describe("registerUser", () => {
       signUpError: new Error("User already registered"),
     });
 
-    const result = await registerUser(
+    const result = await new RegisterUser(auth, userRepository).execute(
       signUpForm("dupe@example.com", "Password1"),
-      auth,
-      userRepository,
     );
 
     expect(result).toEqual({

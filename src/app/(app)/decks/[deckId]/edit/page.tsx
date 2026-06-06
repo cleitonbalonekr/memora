@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateDeckAction } from "@/app/(app)/decks/actions";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
+import { getDeck } from "@/composition-root";
 import { DeckForm } from "@/features/decks/ui/deck-form";
-import { getDeck } from "@/features/decks/use-cases/get-deck";
 
 interface EditDeckPageProps {
   params: Promise<{ deckId: string }>;
@@ -11,7 +10,7 @@ interface EditDeckPageProps {
 
 export default async function EditDeckPage({ params }: EditDeckPageProps) {
   const { deckId } = await params;
-  const deck = await getDeck(deckId, getAuthGateway(), getDeckRepository());
+  const deck = await getDeck().execute(deckId);
 
   if (!deck) {
     notFound();

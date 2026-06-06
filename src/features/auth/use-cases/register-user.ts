@@ -1,46 +1,54 @@
 import { AuthGateway } from "@/ports/auth-gateway";
 import { UserRepository } from "@/ports/user-repository";
+import { UseCase } from "@/shared/use-case";
 import { AuthUseCaseResult, mapAuthError } from "./auth-errors";
 import { parseSignUpInput } from "./parse-auth-input";
 
-export async function registerUser(
-  formData: FormData,
-  authGateway: AuthGateway,
-  userRepository: UserRepository
-): Promise<AuthUseCaseResult> {
-  const parsed = parseSignUpInput(formData);
-
-  if (!parsed.input) {
-    return {
-      status: "invalid_input",
-      fieldErrors: parsed.fieldErrors ?? {},
-      message: "Check the highlighted fields.",
-    };
+// Establishes a session, so it extends the plain UseCase base (no current user
+// exists yet) and runs without resolving one.
+export class RegisterUser extends UseCase<FormData, AuthUseCaseResult> {
+  constructor(
+    private readonly auth: AuthGateway,
+    private readonly users: UserRepository,
+  ) {
+    super();
   }
 
-  try {
-    const user = await authGateway.signUp(parsed.input.email, parsed.input.password);
-    await userRepository.ensureProfile({
-      id: user.id,
-      email: user.email,
-    });
+  async execute(formData: FormData): Promise<AuthUseCaseResult> {
+    const parsed = parseSignUpInput(formData);
 
-    if (user.needsEmailConfirmation) {
+    if (!parsed.input) {
       return {
-        status: "check_email",
-        email: user.email,
+        status: "invalid_input",
+        fieldErrors: parsed.fieldErrors ?? {},
+        message: "Check the highlighted fields.",
       };
     }
 
-    return {
-      status: "success",
-      userId: user.id,
-      email: user.email,
-    };
-  } catch (error) {
-    return {
-      status: "provider_error",
-      message: mapAuthError(error),
-    };
+    try {
+      const user = await this.auth.signUp(parsed.input.email, parsed.input.password);
+      await this.users.ensureProfile({
+        id: user.id,
+        email: user.email,
+      });
+
+      if (user.needsEmailConfirmation) {
+        return {
+          status: "check_email",
+          email: user.email,
+        };
+      }
+
+      return {
+        status: "success",
+        userId: user.id,
+        email: user.email,
+      };
+    } catch (error) {
+      return {
+        status: "provider_error",
+        message: mapAuthError(error),
+      };
+    }
   }
 }

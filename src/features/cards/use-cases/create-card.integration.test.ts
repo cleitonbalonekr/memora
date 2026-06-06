@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCard } from "./create-card";
+import { CreateCard } from "./create-card";
 import { CARD_SIDE_MAX } from "@/features/cards/domain/card-rules";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
@@ -32,12 +32,10 @@ describe("createCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await createCard(
-      deck.id,
-      formData({ front: "What is the femur?", back: "A bone." }),
-      auth,
-      cardRepository,
-    );
+    const result = await new CreateCard(auth, cardRepository).execute({
+      deckId: deck.id,
+      formData: formData({ front: "What is the femur?", back: "A bone." }),
+    });
 
     expect(result.status).toBe("success");
     const cards = await cardRepository.listByDeckId(deck.id, ownerId);
@@ -53,12 +51,10 @@ describe("createCard", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    const result = await createCard(
-      deck.id,
-      formData({ front: "Sneaky?", back: "No." }),
-      auth,
-      cardRepository,
-    );
+    const result = await new CreateCard(auth, cardRepository).execute({
+      deckId: deck.id,
+      formData: formData({ front: "Sneaky?", back: "No." }),
+    });
 
     expect(result.status).toBe("not_found");
     expect(await cardRepository.listByDeckId(deck.id, ownerId)).toHaveLength(0);
@@ -71,12 +67,10 @@ describe("createCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await createCard(
-      deck.id,
-      formData({ front: "a".repeat(CARD_SIDE_MAX + 1), back: "A bone." }),
-      auth,
-      cardRepository,
-    );
+    const result = await new CreateCard(auth, cardRepository).execute({
+      deckId: deck.id,
+      formData: formData({ front: "a".repeat(CARD_SIDE_MAX + 1), back: "A bone." }),
+    });
 
     expect(result.status).toBe("invalid_input");
     if (result.status !== "invalid_input") return;

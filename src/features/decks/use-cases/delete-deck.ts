@@ -1,20 +1,26 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { DeckRepository } from "@/ports/deck-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { DeckDeletionResult, isDeckNotFoundError } from "./deck-errors";
 
-export async function deleteDeck(
-  deckId: string,
-  authGateway: AuthGateway,
-  deckRepository: DeckRepository,
-): Promise<DeckDeletionResult> {
-  const user = await requireCurrentUser(authGateway);
+export class DeleteDeck extends AuthedUseCase<string, DeckDeletionResult> {
+  constructor(
+    auth: AuthGateway,
+    private readonly decks: DeckRepository,
+  ) {
+    super(auth);
+  }
 
-  try {
+  protected async handle(
+    user: SessionUser,
+    deckId: string,
+  ): Promise<DeckDeletionResult> {
     // The schema cascades the delete to the deck's cards (cards.deck_id FK).
-    await deckRepository.delete(deckId, user.id);
+    await this.decks.delete(deckId, user.id);
     return { status: "success" };
-  } catch (error) {
+  }
+
+  protected mapError(error: unknown): DeckDeletionResult {
     if (isDeckNotFoundError(error)) {
       return { status: "not_found" };
     }

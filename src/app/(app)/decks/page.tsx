@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
+import { getListDecks } from "@/composition-root";
 import { LogoutButton } from "@/features/auth/ui/logout-button";
 import { DeckList } from "@/features/decks/ui/deck-list";
-import { listDecks } from "@/features/decks/use-cases/list-decks";
 
 export default async function DecksPage() {
-  const decks = await listDecks(getAuthGateway(), getDeckRepository());
+  const decks = await getListDecks().execute();
 
   return (
     <main className="min-h-dvh bg-surface px-margin-mobile py-lg text-on-surface">

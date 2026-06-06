@@ -1,16 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  getAiCardGenerator,
-  getAuthGateway,
-  getCardRepository,
-  getDeckRepository,
-  getRateLimiter,
-} from "@/composition-root";
+import { getGenerateCardDrafts, getSaveSelectedDrafts } from "@/composition-root";
 import { CardDraft } from "@/ports/ai-card-generator";
-import { generateCardDrafts } from "@/features/ai/use-cases/generate-card-drafts";
-import { saveSelectedDrafts } from "@/features/ai/use-cases/save-selected-drafts";
 
 // Serializable results returned to the client review component. deckId is bound
 // server-side (action.bind) so the target deck is never taken from client form
@@ -28,12 +20,7 @@ export async function generateDraftsAction(
   deckId: string,
   topicOrNotes: string,
 ): Promise<GenerateDraftsActionResult> {
-  const result = await generateCardDrafts(deckId, topicOrNotes, {
-    authGateway: getAuthGateway(),
-    deckRepository: getDeckRepository(),
-    rateLimiter: getRateLimiter(),
-    aiCardGenerator: getAiCardGenerator(),
-  });
+  const result = await getGenerateCardDrafts().execute({ deckId, topicOrNotes });
 
   switch (result.status) {
     case "success":
@@ -51,10 +38,7 @@ export async function saveDraftsAction(
   deckId: string,
   drafts: CardDraft[],
 ): Promise<SaveDraftsActionResult> {
-  const result = await saveSelectedDrafts(deckId, drafts, {
-    authGateway: getAuthGateway(),
-    cardRepository: getCardRepository(),
-  });
+  const result = await getSaveSelectedDrafts().execute({ deckId, drafts });
 
   switch (result.status) {
     case "success":

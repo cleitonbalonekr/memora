@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { updateDeck } from "./update-deck";
+import { UpdateDeck } from "./update-deck";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
@@ -33,12 +33,10 @@ describe("updateDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await updateDeck(
-      deck.id,
-      formData({ title: "New", description: "New description" }),
-      auth,
-      deckRepository,
-    );
+    const result = await new UpdateDeck(auth, deckRepository).execute({
+      deckId: deck.id,
+      formData: formData({ title: "New", description: "New description" }),
+    });
 
     expect(result.status).toBe("success");
     const reloaded = await deckRepository.findById(deck.id, ownerId);
@@ -57,7 +55,10 @@ describe("updateDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    await updateDeck(deck.id, formData({ title: "Spanish" }), auth, deckRepository);
+    await new UpdateDeck(auth, deckRepository).execute({
+      deckId: deck.id,
+      formData: formData({ title: "Spanish" }),
+    });
 
     const reloaded = await deckRepository.findById(deck.id, ownerId);
     expect(reloaded?.description).toBeNull();
@@ -71,12 +72,10 @@ describe("updateDeck", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    const result = await updateDeck(
-      deck.id,
-      formData({ title: "Hijacked" }),
-      auth,
-      deckRepository,
-    );
+    const result = await new UpdateDeck(auth, deckRepository).execute({
+      deckId: deck.id,
+      formData: formData({ title: "Hijacked" }),
+    });
 
     expect(result.status).toBe("not_found");
     const reloaded = await deckRepository.findById(deck.id, ownerId);
@@ -90,12 +89,10 @@ describe("updateDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await updateDeck(
-      deck.id,
-      formData({ title: "  " }),
-      auth,
-      deckRepository,
-    );
+    const result = await new UpdateDeck(auth, deckRepository).execute({
+      deckId: deck.id,
+      formData: formData({ title: "  " }),
+    });
 
     expect(result.status).toBe("invalid_input");
   });

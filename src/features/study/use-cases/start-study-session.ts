@@ -1,21 +1,25 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { StudyCard } from "@/features/study/domain/study-session";
 
 // Loads the owner's cards for a deck to seed a study session. Ownership is
 // enforced by the repository (the deck join), so a non-owner deck is rejected.
-export async function startStudySession(
-  deckId: string,
-  authGateway: AuthGateway,
-  cardRepository: CardRepository,
-): Promise<StudyCard[]> {
-  const user = await requireCurrentUser(authGateway);
-  const cards = await cardRepository.listByDeckId(deckId, user.id);
+export class StartStudySession extends AuthedUseCase<string, StudyCard[]> {
+  constructor(
+    auth: AuthGateway,
+    private readonly cards: CardRepository,
+  ) {
+    super(auth);
+  }
 
-  return cards.map((card) => ({
-    id: card.id,
-    frontText: card.frontText,
-    backText: card.backText,
-  }));
+  protected async handle(user: SessionUser, deckId: string): Promise<StudyCard[]> {
+    const cards = await this.cards.listByDeckId(deckId, user.id);
+
+    return cards.map((card) => ({
+      id: card.id,
+      frontText: card.frontText,
+      backText: card.backText,
+    }));
+  }
 }

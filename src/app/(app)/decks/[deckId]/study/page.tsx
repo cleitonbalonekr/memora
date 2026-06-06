@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  getAuthGateway,
-  getCardRepository,
-  getDeckRepository,
-} from "@/composition-root";
+import { getDeck, getStartStudySession } from "@/composition-root";
 import { StudyRunner } from "@/features/study/ui/study-runner";
-import { startStudySession } from "@/features/study/use-cases/start-study-session";
-import { getDeck } from "@/features/decks/use-cases/get-deck";
 
 interface StudyPageProps {
   params: Promise<{ deckId: string }>;
@@ -15,17 +9,13 @@ interface StudyPageProps {
 
 export default async function StudyPage({ params }: StudyPageProps) {
   const { deckId } = await params;
-  const deck = await getDeck(deckId, getAuthGateway(), getDeckRepository());
+  const deck = await getDeck().execute(deckId);
 
   if (!deck) {
     notFound();
   }
 
-  const cards = await startStudySession(
-    deck.id,
-    getAuthGateway(),
-    getCardRepository(),
-  );
+  const cards = await getStartStudySession().execute(deck.id);
 
   if (cards.length === 0) {
     return (

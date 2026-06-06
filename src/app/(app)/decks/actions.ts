@@ -2,17 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
-import { createDeck } from "@/features/decks/use-cases/create-deck";
-import { deleteDeck } from "@/features/decks/use-cases/delete-deck";
-import { updateDeck } from "@/features/decks/use-cases/update-deck";
+import { getCreateDeck, getDeleteDeck, getUpdateDeck } from "@/composition-root";
 import { FormState } from "@/shared/actions/form-state";
 
 export async function createDeckAction(
   _state: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const result = await createDeck(formData, getAuthGateway(), getDeckRepository());
+  const result = await getCreateDeck().execute(formData);
 
   switch (result.status) {
     case "success":
@@ -40,7 +37,7 @@ export async function createDeckAction(
 // from client-supplied form data. A provider error is surfaced (not swallowed);
 // a missing deck and a successful delete both land back on the decks list.
 export async function deleteDeckAction(deckId: string): Promise<void> {
-  const result = await deleteDeck(deckId, getAuthGateway(), getDeckRepository());
+  const result = await getDeleteDeck().execute(deckId);
 
   if (result.status === "provider_error") {
     throw new Error(result.message);
@@ -57,12 +54,7 @@ export async function updateDeckAction(
   _state: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const result = await updateDeck(
-    deckId,
-    formData,
-    getAuthGateway(),
-    getDeckRepository(),
-  );
+  const result = await getUpdateDeck().execute({ deckId, formData });
 
   switch (result.status) {
     case "success":

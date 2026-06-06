@@ -1,19 +1,25 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { CardDeletionResult, isCardNotFoundError } from "./card-errors";
 
-export async function deleteCard(
-  cardId: string,
-  authGateway: AuthGateway,
-  cardRepository: CardRepository,
-): Promise<CardDeletionResult> {
-  const user = await requireCurrentUser(authGateway);
+export class DeleteCard extends AuthedUseCase<string, CardDeletionResult> {
+  constructor(
+    auth: AuthGateway,
+    private readonly cards: CardRepository,
+  ) {
+    super(auth);
+  }
 
-  try {
-    await cardRepository.delete(cardId, user.id);
+  protected async handle(
+    user: SessionUser,
+    cardId: string,
+  ): Promise<CardDeletionResult> {
+    await this.cards.delete(cardId, user.id);
     return { status: "success" };
-  } catch (error) {
+  }
+
+  protected mapError(error: unknown): CardDeletionResult {
     if (isCardNotFoundError(error)) {
       return { status: "not_found" };
     }

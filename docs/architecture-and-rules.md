@@ -35,29 +35,38 @@ Each decision uses a short record format: context, decision, and consequences.
 **Decision.** Use a layered architecture with three layers:
 
 - **Web layer**: Next.js route handlers, server actions, and React components. Handles HTTP, sessions, input parsing, and rendering. No business rules here.
-- **Application layer**: use cases (one function per user action, for example `createCard`, `generateCardDrafts`). This layer orchestrates: it validates input, calls the domain where needed, and calls ports for data and external services.
+- **Application layer**: use cases (one class per user action, for example `CreateCard`, `GenerateCardDrafts`, each exposing a single `execute(input)` method). This layer orchestrates: it validates input, calls the domain where needed, and calls ports for data and external services. See ADR-002 for the class shape and base hierarchy.
 - **Domain layer (thin)**: pure functions and small types that hold real rules. For the MVP this is small: flashcard validation rules, study-session logic, and the AI draft validator.
 
-For simple actions the use case reads like a transaction script: validate, persist, return. That is intentional and correct for CRUD.
+For simple actions the use case body reads like a transaction script: validate, persist, return. That logic is intentionally thin for CRUD — but it lives inside a use-case class (ADR-002), not a free function.
 
 **Consequences.** Engineers do not have to decide the architecture per feature. CRUD stays thin. Behavior-heavy features have a clear home. The layering is light enough that no one fights it.
 
-### ADR-002: Use which pattern, domain model or transaction script, per feature
+### ADR-002: Use a uniform use-case class shape; vary the amount of domain logic per feature
 
-**Context.** The team asked whether to use a domain model or transaction scripts.
+**Context.** The team asked whether to use a domain model or transaction scripts. An earlier revision of this ADR prescribed transaction-script **functions** that took dependencies as trailing arguments. That mixed runtime input with dependency wiring at every call site (`createDeck(formData, getAuthGateway(), getDeckRepository())`) and left the shared auth/error lifecycle duplicated by hand in every use case. This revision keeps the per-feature judgment about *how much* domain logic to model, but standardizes the *shape* every use case takes.
 
-**Decision.** Use both, deliberately, based on the feature:
+**Decision.** Every backend use case is a **class** with a single public `execute(input)` method. Dependencies (ports) enter through the constructor; runtime input enters through `execute`. A use case never receives a dependency through `execute`, nor runtime input through its constructor. Multiple runtime values are bundled into one typed input object (for example `UpdateDeck` takes `{ deckId, formData }`).
 
-| Feature | Pattern | Why |
-|---|---|---|
-| Auth (register, login) | Transaction script | Standard flows, little branching behavior |
-| Deck CRUD | Transaction script | Pure data operations |
-| Card CRUD | Transaction script | Pure data operations, with one small rule set (length, single concept) extracted to the domain |
-| AI card generation | Domain logic + use case | Prompt building and draft validation are real rules worth isolating and testing |
-| Study session | Domain logic | Re-queue and session state have behavior |
-| Spaced repetition (phase 2) | Domain model | Scheduling is genuine domain logic; model it when it arrives |
+A two-level base hierarchy in `shared` carries the shared lifecycle:
 
-**Consequences.** We do not wrap a `Deck` with no behavior in a rich entity just to follow a pattern. We do isolate the rules that exist so they are unit-testable without a database or a network.
+- **`UseCase<I, O>`** — the minimal contract: `execute(input: I): Promise<O>`. `I` may be `void`.
+- **`AuthedUseCase<I, O>`** — takes `AuthGateway` in its constructor, resolves the current user inside `execute`, and delegates to an abstract `handle(user, input)`. Thrown errors route through an overridable `mapError` (default: rethrow). The repeated "resolve user → run → map errors" lifecycle is written once, here.
+
+Apply it per feature:
+
+| Feature | Base | Domain logic | Why |
+|---|---|---|---|
+| Auth (register, login, logout) | `UseCase` (plain) | Thin | No current user exists yet, so these session-establishing use cases do **not** extend `AuthedUseCase` |
+| Deck CRUD | `AuthedUseCase` | Thin | Pure data operations; commands override `mapError` → `mapDeckError`, reads return bare values with the default (rethrow) `mapError` |
+| Card CRUD | `AuthedUseCase` | Thin, plus one small rule set (length, single concept) extracted to the domain | Commands override `mapError` → `mapCardError`; reads return bare values |
+| AI card generation | `AuthedUseCase` | Real: prompt building and draft validation in the domain | Worth isolating and testing |
+| Study session | `AuthedUseCase` | Real: re-queue and session state in the domain | Behavior worth modeling |
+| Spaced repetition (phase 2) | `AuthedUseCase` | Domain model | Scheduling is genuine domain logic; model it when it arrives |
+
+We do **not** add per-feature intermediate base classes (e.g. `CardUseCase`) yet — only two use cases per feature share a mapper, below the rule-of-three. Revisit if a feature grows many commands.
+
+**Consequences.** Engineers do not decide the use-case shape per feature; it is uniform and gives a hook point for future cross-cutting concerns (logging, timing, transactions). We still do not wrap a `Deck` with no behavior in a rich entity just to follow a pattern, and we still isolate the rules that exist so they are unit-testable without a database or a network. Call sites become `getUseCase().execute(input)` (see ADR-003 for the per-call factory rule).
 
 ### ADR-003: Apply light hexagonal (ports and adapters) only at external boundaries
 
@@ -69,7 +78,9 @@ For simple actions the use case reads like a transaction script: validate, persi
 - `AiCardGenerator`: port for AI drafting. Adapter implemented with the Anthropic API.
 - `AuthGateway` (thin): a small interface over the auth library so use cases ask "who is the current user" without binding to one vendor.
 
-Use cases depend on the **port interfaces**, never on the ORM client or the model SDK directly. Wiring happens at the edge (the route handler or a small composition root).
+Use cases depend on the **port interfaces**, never on the ORM client or the model SDK directly. Wiring happens at the edge in a small composition root (`src/composition-root.ts`), which exposes **one per-call factory per use case** (`getCreateDeck()`, `getListDecks()`, …). Each factory constructs a fresh use-case instance on every call.
+
+**The composition root MUST NOT cache an authenticated use-case instance at module scope.** `AuthGateway` is request-scoped — `SupabaseAuthGateway` reads per-request cookies — so a cached use-case instance would bind a stale gateway and leak data across users. Stateless dependencies (repositories) may stay shared singletons inside the root; only the use-case object and the request-scoped gateway are created per call (cheap, throwaway).
 
 Do not create ports for things that are not external and swappable. No port for a utility function.
 
@@ -114,8 +125,9 @@ Add a lint rule (for example `eslint-plugin-boundaries` or import restrictions) 
 - Use cases return typed results. Map known failures (not found, not authorized, validation) to the right HTTP status at the web layer.
 - Never return raw database or model errors to the client. Log details server-side, return a safe message.
 - Enforce ownership inside the use case or repository, so a user cannot read or write another user's deck or card (SOC2 least privilege).
+- **Resolve the acting user's identity server-side only.** `AuthedUseCase` obtains the current user via the auth gateway, which reads the signed, `httpOnly` session cookie on the server. The system MUST NOT accept the acting user's identity from any client-supplied source — request bodies, query parameters, headers, form fields, or React Context. Per-user ownership checks rely only on this server-resolved identity. A client-sent identity is forgeable and would enable impersonation and cross-user access, a direct violation of least privilege.
 
-**Consequences.** A consistent validation and error story across features, and authorization that is checked in code rather than assumed.
+**Consequences.** A consistent validation and error story across features, and authorization that is checked in code rather than assumed. Because identity resolution lives in one base class, the rule is enforced once rather than re-implemented (and possibly weakened) per use case.
 
 ### ADR-007: Test with the Testing Trophy model
 
@@ -136,22 +148,22 @@ src/
     api/                    # route handlers (thin: parse, call use case, map result)
   features/
     auth/
-      use-cases/            # registerUser, loginUser
+      use-cases/            # RegisterUser, LoginUser, LogoutUser (plain UseCase base)
       domain/               # password policy, session rules (thin)
       ui/                   # auth components
     decks/
-      use-cases/            # createDeck, listDecks, updateDeck, deleteDeck
+      use-cases/            # CreateDeck, ListDecks, UpdateDeck, DeleteDeck, GetDeck
       ui/
     cards/
-      use-cases/            # createCard, updateCard, deleteCard, listCards
+      use-cases/            # CreateCard, UpdateCard, DeleteCard, ListCards, GetCard
       domain/               # card rules: length cap, single-concept hints
       ui/
     study/
-      use-cases/            # startSession, recordResult
+      use-cases/            # StartStudySession
       domain/               # re-queue logic, session state
       ui/
     ai/
-      use-cases/            # generateCardDrafts, saveSelectedDrafts
+      use-cases/            # GenerateCardDrafts, SaveSelectedDrafts
       domain/               # prompt builder, draft validator (flashcard rules)
       ui/
   ports/                    # interfaces: DeckRepository, CardRepository, AiCardGenerator, AuthGateway
@@ -159,7 +171,8 @@ src/
     db/                     # ORM-backed repositories implementing the ports
     ai/                     # Anthropic-backed AiCardGenerator
     auth/                   # auth library behind AuthGateway
-  shared/                   # cross-cutting helpers, types, validation schemas, errors
+  composition-root.ts       # per-call factories: new each use case with resolved deps
+  shared/                   # use-case base classes (UseCase, AuthedUseCase), cross-cutting helpers, types, errors
 tests/
   e2e/                      # Playwright journeys
 ```

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDeck } from "./create-deck";
+import { CreateDeck } from "./create-deck";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
@@ -28,10 +28,8 @@ describe("createDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await createDeck(
+    const result = await new CreateDeck(auth, deckRepository).execute(
       formData({ title: "Spanish", description: "Verbs" }),
-      auth,
-      deckRepository,
     );
 
     expect(result.status).toBe("success");
@@ -50,7 +48,9 @@ describe("createDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await createDeck(formData({ title: "  " }), auth, deckRepository);
+    const result = await new CreateDeck(auth, deckRepository).execute(
+      formData({ title: "  " }),
+    );
 
     expect(result.status).toBe("invalid_input");
     if (result.status !== "invalid_input") return;
@@ -63,7 +63,7 @@ describe("createDeck", () => {
     const auth = new FakeAuthGateway({ currentUser: null });
 
     await expect(
-      createDeck(formData({ title: "Spanish" }), auth, deckRepository),
+      new CreateDeck(auth, deckRepository).execute(formData({ title: "Spanish" })),
     ).rejects.toThrow("Unauthorized");
   });
 });

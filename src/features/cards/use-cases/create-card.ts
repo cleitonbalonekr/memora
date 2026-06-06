@@ -1,28 +1,37 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { CardUseCaseResult, mapCardError } from "./card-errors";
 import { parseCardInput } from "./card-input";
 
-export async function createCard(
-  deckId: string,
-  formData: FormData,
-  authGateway: AuthGateway,
-  cardRepository: CardRepository,
-): Promise<CardUseCaseResult> {
-  const user = await requireCurrentUser(authGateway);
-  const parsed = parseCardInput(formData);
+export interface CreateCardInput {
+  deckId: string;
+  formData: FormData;
+}
 
-  if (!parsed.input) {
-    return {
-      status: "invalid_input",
-      fieldErrors: parsed.fieldErrors ?? {},
-      message: "Check the highlighted fields.",
-    };
+export class CreateCard extends AuthedUseCase<CreateCardInput, CardUseCaseResult> {
+  constructor(
+    auth: AuthGateway,
+    private readonly cards: CardRepository,
+  ) {
+    super(auth);
   }
 
-  try {
-    const card = await cardRepository.create(
+  protected async handle(
+    user: SessionUser,
+    { deckId, formData }: CreateCardInput,
+  ): Promise<CardUseCaseResult> {
+    const parsed = parseCardInput(formData);
+
+    if (!parsed.input) {
+      return {
+        status: "invalid_input",
+        fieldErrors: parsed.fieldErrors ?? {},
+        message: "Check the highlighted fields.",
+      };
+    }
+
+    const card = await this.cards.create(
       {
         deckId,
         frontText: parsed.input.frontText,
@@ -32,7 +41,9 @@ export async function createCard(
     );
 
     return { status: "success", card };
-  } catch (error) {
+  }
+
+  protected mapError(error: unknown): CardUseCaseResult {
     return mapCardError(error);
   }
 }

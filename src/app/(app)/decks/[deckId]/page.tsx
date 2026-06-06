@@ -1,15 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { deleteDeckAction } from "@/app/(app)/decks/actions";
-import {
-  getAuthGateway,
-  getCardRepository,
-  getDeckRepository,
-} from "@/composition-root";
+import { getDeck, getListCards } from "@/composition-root";
 import { CardList } from "@/features/cards/ui/card-list";
-import { listCards } from "@/features/cards/use-cases/list-cards";
 import { DeleteDeckButton } from "@/features/decks/ui/delete-deck-button";
-import { getDeck } from "@/features/decks/use-cases/get-deck";
 
 interface DeckPageProps {
   params: Promise<{ deckId: string }>;
@@ -17,13 +11,13 @@ interface DeckPageProps {
 
 export default async function DeckPage({ params }: DeckPageProps) {
   const { deckId } = await params;
-  const deck = await getDeck(deckId, getAuthGateway(), getDeckRepository());
+  const deck = await getDeck().execute(deckId);
 
   if (!deck) {
     notFound();
   }
 
-  const cards = await listCards(deck.id, getAuthGateway(), getCardRepository());
+  const cards = await getListCards().execute(deck.id);
   const deleteAction = deleteDeckAction.bind(null, deck.id);
 
   return (

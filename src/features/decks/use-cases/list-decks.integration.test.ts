@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listDecks } from "./list-decks";
+import { ListDecks } from "./list-decks";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
@@ -26,7 +26,7 @@ describe("listDecks", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const decks = await listDecks(auth, deckRepository);
+    const decks = await new ListDecks(auth, deckRepository).execute();
 
     expect(decks.map((deck) => deck.title)).toEqual(["Spanish", "Biology"]);
   });
@@ -34,6 +34,8 @@ describe("listDecks", () => {
   it("throws Unauthorized when there is no signed-in user", async () => {
     const auth = new FakeAuthGateway({ currentUser: null });
 
-    await expect(listDecks(auth, deckRepository)).rejects.toThrow("Unauthorized");
+    await expect(new ListDecks(auth, deckRepository).execute()).rejects.toThrow(
+      "Unauthorized",
+    );
   });
 });

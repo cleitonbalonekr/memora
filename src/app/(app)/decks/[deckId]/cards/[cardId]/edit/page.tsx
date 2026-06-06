@@ -4,10 +4,9 @@ import {
   deleteCardAction,
   updateCardAction,
 } from "@/app/(app)/decks/[deckId]/cards/actions";
-import { getAuthGateway, getCardRepository } from "@/composition-root";
+import { getCard } from "@/composition-root";
 import { CardForm } from "@/features/cards/ui/card-form";
 import { DeleteCardButton } from "@/features/cards/ui/delete-card-button";
-import { getCard } from "@/features/cards/use-cases/get-card";
 
 interface EditCardPageProps {
   params: Promise<{ deckId: string; cardId: string }>;
@@ -15,7 +14,7 @@ interface EditCardPageProps {
 
 export default async function EditCardPage({ params }: EditCardPageProps) {
   const { deckId, cardId } = await params;
-  const card = await getCard(cardId, getAuthGateway(), getCardRepository());
+  const card = await getCard().execute(cardId);
 
   if (!card) {
     notFound();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { saveSelectedDrafts } from "./save-selected-drafts";
+import { SaveSelectedDrafts } from "./save-selected-drafts";
 import { CARD_SIDE_MAX } from "@/features/cards/domain/card-rules";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
@@ -24,14 +24,13 @@ describe("saveSelectedDrafts", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await saveSelectedDrafts(
-      deck.id,
-      [
+    const result = await new SaveSelectedDrafts(auth, cardRepository).execute({
+      deckId: deck.id,
+      drafts: [
         { frontText: "What is mitosis?", backText: "Cell division." },
         { frontText: "What is meiosis?", backText: "Gamete-forming division." },
       ],
-      { authGateway: auth, cardRepository },
-    );
+    });
 
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
@@ -52,14 +51,13 @@ describe("saveSelectedDrafts", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await saveSelectedDrafts(
-      deck.id,
-      [
+    const result = await new SaveSelectedDrafts(auth, cardRepository).execute({
+      deckId: deck.id,
+      drafts: [
         { frontText: "What is mitosis?", backText: "Cell division." },
         { frontText: "a".repeat(CARD_SIDE_MAX + 1), backText: "Too long." },
       ],
-      { authGateway: auth, cardRepository },
-    );
+    });
 
     expect(result.status).toBe("invalid_input");
     expect(await cardRepository.listByDeckId(deck.id, ownerId)).toHaveLength(0);
@@ -73,11 +71,10 @@ describe("saveSelectedDrafts", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    const result = await saveSelectedDrafts(
-      deck.id,
-      [{ frontText: "Sneaky?", backText: "No." }],
-      { authGateway: auth, cardRepository },
-    );
+    const result = await new SaveSelectedDrafts(auth, cardRepository).execute({
+      deckId: deck.id,
+      drafts: [{ frontText: "Sneaky?", backText: "No." }],
+    });
 
     expect(result.status).toBe("not_found");
     expect(await cardRepository.listByDeckId(deck.id, ownerId)).toHaveLength(0);

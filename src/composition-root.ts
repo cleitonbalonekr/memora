@@ -10,6 +10,22 @@ import { CardRepository } from "@/ports/card-repository";
 import { DeckRepository } from "@/ports/deck-repository";
 import { RateLimiter } from "@/ports/rate-limiter";
 import { UserRepository } from "@/ports/user-repository";
+import { CreateDeck } from "@/features/decks/use-cases/create-deck";
+import { UpdateDeck } from "@/features/decks/use-cases/update-deck";
+import { DeleteDeck } from "@/features/decks/use-cases/delete-deck";
+import { ListDecks } from "@/features/decks/use-cases/list-decks";
+import { GetDeck } from "@/features/decks/use-cases/get-deck";
+import { CreateCard } from "@/features/cards/use-cases/create-card";
+import { UpdateCard } from "@/features/cards/use-cases/update-card";
+import { DeleteCard } from "@/features/cards/use-cases/delete-card";
+import { ListCards } from "@/features/cards/use-cases/list-cards";
+import { GetCard } from "@/features/cards/use-cases/get-card";
+import { StartStudySession } from "@/features/study/use-cases/start-study-session";
+import { GenerateCardDrafts } from "@/features/ai/use-cases/generate-card-drafts";
+import { SaveSelectedDrafts } from "@/features/ai/use-cases/save-selected-drafts";
+import { RegisterUser } from "@/features/auth/use-cases/register-user";
+import { LoginUser } from "@/features/auth/use-cases/login-user";
+import { LogoutUser } from "@/features/auth/use-cases/logout-user";
 
 // Composition root: the single place where ports are bound to concrete
 // adapters. The web layer (pages, server actions) resolves dependencies here
@@ -53,4 +69,77 @@ export function getRateLimiter(): RateLimiter {
 // is actually used (the config asserts the key at construction).
 export function getAiCardGenerator(): AiCardGenerator {
   return new OpenRouterCardGenerator();
+}
+
+// Use-case factories: each returns a fresh instance per call so the
+// request-scoped auth gateway is never captured by a module-level singleton (a
+// cached instance would bind a stale gateway and leak data across users).
+
+export function getCreateDeck(): CreateDeck {
+  return new CreateDeck(getAuthGateway(), getDeckRepository());
+}
+
+export function getUpdateDeck(): UpdateDeck {
+  return new UpdateDeck(getAuthGateway(), getDeckRepository());
+}
+
+export function getDeleteDeck(): DeleteDeck {
+  return new DeleteDeck(getAuthGateway(), getDeckRepository());
+}
+
+export function getListDecks(): ListDecks {
+  return new ListDecks(getAuthGateway(), getDeckRepository());
+}
+
+export function getDeck(): GetDeck {
+  return new GetDeck(getAuthGateway(), getDeckRepository());
+}
+
+export function getCreateCard(): CreateCard {
+  return new CreateCard(getAuthGateway(), getCardRepository());
+}
+
+export function getUpdateCard(): UpdateCard {
+  return new UpdateCard(getAuthGateway(), getCardRepository());
+}
+
+export function getDeleteCard(): DeleteCard {
+  return new DeleteCard(getAuthGateway(), getCardRepository());
+}
+
+export function getListCards(): ListCards {
+  return new ListCards(getAuthGateway(), getCardRepository());
+}
+
+export function getCard(): GetCard {
+  return new GetCard(getAuthGateway(), getCardRepository());
+}
+
+export function getStartStudySession(): StartStudySession {
+  return new StartStudySession(getAuthGateway(), getCardRepository());
+}
+
+export function getGenerateCardDrafts(): GenerateCardDrafts {
+  return new GenerateCardDrafts(
+    getAuthGateway(),
+    getDeckRepository(),
+    getRateLimiter(),
+    getAiCardGenerator(),
+  );
+}
+
+export function getSaveSelectedDrafts(): SaveSelectedDrafts {
+  return new SaveSelectedDrafts(getAuthGateway(), getCardRepository());
+}
+
+export function getRegisterUser(): RegisterUser {
+  return new RegisterUser(getAuthGateway(), getUserRepository());
+}
+
+export function getLoginUser(): LoginUser {
+  return new LoginUser(getAuthGateway(), getUserRepository());
+}
+
+export function getLogoutUser(): LogoutUser {
+  return new LogoutUser(getAuthGateway());
 }

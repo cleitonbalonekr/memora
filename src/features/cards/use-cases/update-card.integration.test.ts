@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { updateCard } from "./update-card";
+import { UpdateCard } from "./update-card";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
@@ -35,12 +35,10 @@ describe("updateCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await updateCard(
-      card.id,
-      formData({ front: "New?", back: "New" }),
-      auth,
-      cardRepository,
-    );
+    const result = await new UpdateCard(auth, cardRepository).execute({
+      cardId: card.id,
+      formData: formData({ front: "New?", back: "New" }),
+    });
 
     expect(result.status).toBe("success");
     const reloaded = await cardRepository.findById(card.id, ownerId);
@@ -60,12 +58,10 @@ describe("updateCard", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    const result = await updateCard(
-      card.id,
-      formData({ front: "Hijacked?", back: "No" }),
-      auth,
-      cardRepository,
-    );
+    const result = await new UpdateCard(auth, cardRepository).execute({
+      cardId: card.id,
+      formData: formData({ front: "Hijacked?", back: "No" }),
+    });
 
     expect(result.status).toBe("not_found");
     const reloaded = await cardRepository.findById(card.id, ownerId);
@@ -83,12 +79,10 @@ describe("updateCard", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const result = await updateCard(
-      card.id,
-      formData({ front: "Q?", back: "  " }),
-      auth,
-      cardRepository,
-    );
+    const result = await new UpdateCard(auth, cardRepository).execute({
+      cardId: card.id,
+      formData: formData({ front: "Q?", back: "  " }),
+    });
 
     expect(result.status).toBe("invalid_input");
   });

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { generateCardDrafts, GenerateCardDraftsDeps } from "./generate-card-drafts";
+import { GenerateCardDrafts } from "./generate-card-drafts";
 import { CARD_SIDE_MAX } from "@/features/cards/domain/card-rules";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
+import { AuthGateway } from "@/ports/auth-gateway";
+import { RateLimiter } from "@/ports/rate-limiter";
+import { AiCardGenerator } from "@/ports/ai-card-generator";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
 import { FakeAiCardGenerator } from "../../../../tests/support/fake-ai-card-generator";
 import { FakeRateLimiter } from "../../../../tests/support/fake-rate-limiter";
@@ -16,16 +19,25 @@ async function createUser(email: string): Promise<string> {
   return id;
 }
 
-function deps(
-  overrides: Partial<GenerateCardDraftsDeps>,
-): GenerateCardDraftsDeps {
-  return {
+interface UseCaseDeps {
+  authGateway: AuthGateway;
+  rateLimiter: RateLimiter;
+  aiCardGenerator: AiCardGenerator;
+}
+
+function useCase(overrides: Partial<UseCaseDeps>): GenerateCardDrafts {
+  const deps: UseCaseDeps = {
     authGateway: new FakeAuthGateway(),
-    deckRepository,
     rateLimiter: new FakeRateLimiter({ allowed: true }),
     aiCardGenerator: new FakeAiCardGenerator(),
     ...overrides,
   };
+  return new GenerateCardDrafts(
+    deps.authGateway,
+    deckRepository,
+    deps.rateLimiter,
+    deps.aiCardGenerator,
+  );
 }
 
 describe("generateCardDrafts", () => {
@@ -39,16 +51,12 @@ describe("generateCardDrafts", () => {
       ],
     });
 
-    const result = await generateCardDrafts(
-      deck.id,
-      "Cell biology",
-      deps({
-        authGateway: new FakeAuthGateway({
-          currentUser: { id: ownerId, email: "owner@example.com" },
-        }),
-        aiCardGenerator: generator,
+    const result = await useCase({
+      authGateway: new FakeAuthGateway({
+        currentUser: { id: ownerId, email: "owner@example.com" },
       }),
-    );
+      aiCardGenerator: generator,
+    }).execute({ deckId: deck.id, topicOrNotes: "Cell biology" });
 
     expect(result.status).toBe("success");
     if (result.status !== "success") return;
@@ -66,16 +74,12 @@ describe("generateCardDrafts", () => {
       drafts: [{ frontText: "Q?", backText: "A." }],
     });
 
-    const result = await generateCardDrafts(
-      deck.id,
-      "   ",
-      deps({
-        authGateway: new FakeAuthGateway({
-          currentUser: { id: ownerId, email: "owner@example.com" },
-        }),
-        aiCardGenerator: generator,
+    const result = await useCase({
+      authGateway: new FakeAuthGateway({
+        currentUser: { id: ownerId, email: "owner@example.com" },
       }),
-    );
+      aiCardGenerator: generator,
+    }).execute({ deckId: deck.id, topicOrNotes: "   " });
 
     expect(result.status).toBe("invalid_input");
     expect(generator.calls).toHaveLength(0);
@@ -89,16 +93,12 @@ describe("generateCardDrafts", () => {
       drafts: [{ frontText: "Q?", backText: "A." }],
     });
 
-    const result = await generateCardDrafts(
-      deck.id,
-      "Sneak a peek",
-      deps({
-        authGateway: new FakeAuthGateway({
-          currentUser: { id: intruderId, email: "intruder@example.com" },
-        }),
-        aiCardGenerator: generator,
+    const result = await useCase({
+      authGateway: new FakeAuthGateway({
+        currentUser: { id: intruderId, email: "intruder@example.com" },
       }),
-    );
+      aiCardGenerator: generator,
+    }).execute({ deckId: deck.id, topicOrNotes: "Sneak a peek" });
 
     expect(result.status).toBe("not_found");
     expect(generator.calls).toHaveLength(0);
@@ -111,17 +111,13 @@ describe("generateCardDrafts", () => {
       drafts: [{ frontText: "Q?", backText: "A." }],
     });
 
-    const result = await generateCardDrafts(
-      deck.id,
-      "Cell biology",
-      deps({
-        authGateway: new FakeAuthGateway({
-          currentUser: { id: ownerId, email: "owner@example.com" },
-        }),
-        rateLimiter: new FakeRateLimiter({ allowed: false, retryAfterSeconds: 30 }),
-        aiCardGenerator: generator,
+    const result = await useCase({
+      authGateway: new FakeAuthGateway({
+        currentUser: { id: ownerId, email: "owner@example.com" },
       }),
-    );
+      rateLimiter: new FakeRateLimiter({ allowed: false, retryAfterSeconds: 30 }),
+      aiCardGenerator: generator,
+    }).execute({ deckId: deck.id, topicOrNotes: "Cell biology" });
 
     expect(result.status).toBe("rate_limited");
     if (result.status !== "rate_limited") return;
@@ -133,18 +129,14 @@ describe("generateCardDrafts", () => {
     const ownerId = await createUser("owner@example.com");
     const deck = await deckRepository.create({ userId: ownerId, title: "Biology" });
 
-    const result = await generateCardDrafts(
-      deck.id,
-      "Cell biology",
-      deps({
-        authGateway: new FakeAuthGateway({
-          currentUser: { id: ownerId, email: "owner@example.com" },
-        }),
-        aiCardGenerator: new FakeAiCardGenerator({
-          error: new Error("AI provider returned malformed output"),
-        }),
+    const result = await useCase({
+      authGateway: new FakeAuthGateway({
+        currentUser: { id: ownerId, email: "owner@example.com" },
       }),
-    );
+      aiCardGenerator: new FakeAiCardGenerator({
+        error: new Error("AI provider returned malformed output"),
+      }),
+    }).execute({ deckId: deck.id, topicOrNotes: "Cell biology" });
 
     expect(result.status).toBe("provider_error");
   });

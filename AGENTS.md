@@ -17,7 +17,7 @@ This is a Next.js 16 App Router application. Web entry points live in `src/app/`
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript strict mode and the `@/*` alias for imports from `src`. Keep domain logic pure; put database, auth, network, and provider calls in adapters or use cases. Use small ports such as `DeckRepository`. Prefer kebab-case filenames (`drizzle-card-repository.ts`) and PascalCase React components. Follow existing formatting: two-space indentation, double quotes, and no commented-out code.
+Use TypeScript strict mode and the `@/*` alias for imports from `src`. Keep domain logic pure; put database, auth, network, and provider calls in adapters or use cases. Use small ports such as `DeckRepository`. Each use case is a class with a single `execute(input)` method: dependencies enter through the constructor, runtime input through `execute`, and it is built by a per-call factory in `src/composition-root.ts` (see ADR-002/ADR-003). Authenticated use cases extend `AuthedUseCase` and resolve the acting user server-side, never from client input. Prefer kebab-case filenames (`drizzle-card-repository.ts`) and PascalCase React components and class names. Follow existing formatting: two-space indentation, double quotes, and no commented-out code.
 Read @docs/architecture-and-rules.md to full architecture and code reference
 
 ## Testing Guidelines

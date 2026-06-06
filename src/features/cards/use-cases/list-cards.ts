@@ -1,12 +1,16 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { Card, CardRepository } from "@/ports/card-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 
-export async function listCards(
-  deckId: string,
-  authGateway: AuthGateway,
-  cardRepository: CardRepository,
-): Promise<Card[]> {
-  const user = await requireCurrentUser(authGateway);
-  return cardRepository.listByDeckId(deckId, user.id);
+export class ListCards extends AuthedUseCase<string, Card[]> {
+  constructor(
+    auth: AuthGateway,
+    private readonly cards: CardRepository,
+  ) {
+    super(auth);
+  }
+
+  protected async handle(user: SessionUser, deckId: string): Promise<Card[]> {
+    return this.cards.listByDeckId(deckId, user.id);
+  }
 }

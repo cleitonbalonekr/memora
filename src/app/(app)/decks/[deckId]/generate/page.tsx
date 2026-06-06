@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { generateDraftsAction, saveDraftsAction } from "./actions";
-import { getAuthGateway, getDeckRepository } from "@/composition-root";
+import { getDeck } from "@/composition-root";
 import { DraftReview } from "@/features/ai/ui/draft-review";
-import { getDeck } from "@/features/decks/use-cases/get-deck";
 
 interface GeneratePageProps {
   params: Promise<{ deckId: string }>;
@@ -11,7 +10,7 @@ interface GeneratePageProps {
 
 export default async function GeneratePage({ params }: GeneratePageProps) {
   const { deckId } = await params;
-  const deck = await getDeck(deckId, getAuthGateway(), getDeckRepository());
+  const deck = await getDeck().execute(deckId);
 
   if (!deck) {
     notFound();

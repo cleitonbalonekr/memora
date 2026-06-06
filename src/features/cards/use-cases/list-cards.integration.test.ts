@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { listCards } from "./list-cards";
+import { ListCards } from "./list-cards";
 import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
@@ -31,7 +31,7 @@ describe("listCards", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const cards = await listCards(deck.id, auth, cardRepository);
+    const cards = await new ListCards(auth, cardRepository).execute(deck.id);
 
     expect(cards.map((card) => card.frontText)).toEqual(["First?", "Second?"]);
   });
@@ -44,8 +44,8 @@ describe("listCards", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    await expect(listCards(deck.id, auth, cardRepository)).rejects.toThrow(
-      "not found or unauthorized",
-    );
+    await expect(
+      new ListCards(auth, cardRepository).execute(deck.id),
+    ).rejects.toThrow("not found or unauthorized");
   });
 });

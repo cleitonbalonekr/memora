@@ -1,35 +1,46 @@
-import { AuthGateway } from "@/ports/auth-gateway";
+import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { DeckRepository } from "@/ports/deck-repository";
-import { requireCurrentUser } from "@/features/auth/use-cases/require-current-user";
+import { AuthedUseCase } from "@/shared/authed-use-case";
 import { DeckUseCaseResult, mapDeckError } from "./deck-errors";
 import { parseDeckInput } from "./deck-input";
 
-export async function updateDeck(
-  deckId: string,
-  formData: FormData,
-  authGateway: AuthGateway,
-  deckRepository: DeckRepository,
-): Promise<DeckUseCaseResult> {
-  const user = await requireCurrentUser(authGateway);
-  const parsed = parseDeckInput(formData);
+export interface UpdateDeckInput {
+  deckId: string;
+  formData: FormData;
+}
 
-  if (!parsed.input) {
-    return {
-      status: "invalid_input",
-      fieldErrors: parsed.fieldErrors ?? {},
-      message: "Check the highlighted fields.",
-    };
+export class UpdateDeck extends AuthedUseCase<UpdateDeckInput, DeckUseCaseResult> {
+  constructor(
+    auth: AuthGateway,
+    private readonly decks: DeckRepository,
+  ) {
+    super(auth);
   }
 
-  try {
-    const deck = await deckRepository.update(deckId, user.id, {
+  protected async handle(
+    user: SessionUser,
+    { deckId, formData }: UpdateDeckInput,
+  ): Promise<DeckUseCaseResult> {
+    const parsed = parseDeckInput(formData);
+
+    if (!parsed.input) {
+      return {
+        status: "invalid_input",
+        fieldErrors: parsed.fieldErrors ?? {},
+        message: "Check the highlighted fields.",
+      };
+    }
+
+    const deck = await this.decks.update(deckId, user.id, {
       title: parsed.input.title,
       // An edit replaces the description; a cleared field becomes null.
       description: parsed.input.description ?? null,
     });
 
     return { status: "success", deck };
-  } catch (error) {
+  }
+
+  protected mapError(error: unknown): DeckUseCaseResult {
     return mapDeckError(error);
   }
 }

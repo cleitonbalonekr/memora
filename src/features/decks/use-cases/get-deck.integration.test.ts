@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDeck } from "./get-deck";
+import { GetDeck } from "./get-deck";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { FakeAuthGateway } from "../../../../tests/support/fake-auth-gateway";
@@ -21,7 +21,7 @@ describe("getDeck", () => {
       currentUser: { id: ownerId, email: "owner@example.com" },
     });
 
-    const found = await getDeck(deck.id, auth, deckRepository);
+    const found = await new GetDeck(auth, deckRepository).execute(deck.id);
 
     expect(found?.id).toBe(deck.id);
     expect(found?.title).toBe("Spanish");
@@ -35,14 +35,14 @@ describe("getDeck", () => {
       currentUser: { id: intruderId, email: "intruder@example.com" },
     });
 
-    expect(await getDeck(deck.id, auth, deckRepository)).toBeNull();
+    expect(await new GetDeck(auth, deckRepository).execute(deck.id)).toBeNull();
   });
 
   it("throws Unauthorized when there is no signed-in user", async () => {
     const auth = new FakeAuthGateway({ currentUser: null });
 
     await expect(
-      getDeck(crypto.randomUUID(), auth, deckRepository),
+      new GetDeck(auth, deckRepository).execute(crypto.randomUUID()),
     ).rejects.toThrow("Unauthorized");
   });
 });

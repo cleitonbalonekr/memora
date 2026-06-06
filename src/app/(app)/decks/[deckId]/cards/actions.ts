@@ -2,10 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getAuthGateway, getCardRepository } from "@/composition-root";
-import { createCard } from "@/features/cards/use-cases/create-card";
-import { deleteCard } from "@/features/cards/use-cases/delete-card";
-import { updateCard } from "@/features/cards/use-cases/update-card";
+import { getCreateCard, getDeleteCard, getUpdateCard } from "@/composition-root";
 import { FormState } from "@/shared/actions/form-state";
 
 // deckId is bound server-side (action.bind) so the target deck is never taken
@@ -15,12 +12,7 @@ export async function createCardAction(
   _state: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const result = await createCard(
-    deckId,
-    formData,
-    getAuthGateway(),
-    getCardRepository(),
-  );
+  const result = await getCreateCard().execute({ deckId, formData });
 
   switch (result.status) {
     case "success":
@@ -53,12 +45,7 @@ export async function updateCardAction(
   _state: FormState,
   formData: FormData,
 ): Promise<FormState> {
-  const result = await updateCard(
-    cardId,
-    formData,
-    getAuthGateway(),
-    getCardRepository(),
-  );
+  const result = await getUpdateCard().execute({ cardId, formData });
 
   switch (result.status) {
     case "success":
@@ -90,7 +77,7 @@ export async function deleteCardAction(
   deckId: string,
   cardId: string,
 ): Promise<void> {
-  const result = await deleteCard(cardId, getAuthGateway(), getCardRepository());
+  const result = await getDeleteCard().execute(cardId);
 
   if (result.status === "provider_error") {
     throw new Error(result.message);
