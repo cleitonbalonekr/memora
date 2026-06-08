@@ -3,8 +3,10 @@
 [x] - Add tests
 [x] - /opsx:sync  
 [x] - Move the function approach to a class oriented so we can handle dependencies better
-[ ] - Improve prompt and LLM structured return
 [ ] - Improve cards creation - bulk creation
+[ ] - Improve prompt and LLM structured return
+[ ] - Tools - read a link and extract content
+[ ] - Guard against prompt injection***
 [ ] - Deploy to Cloudflare
 [ ] - User your own API key and model
 [ ] - Default prompts for each type of study area (general, language, programming, create your own);
