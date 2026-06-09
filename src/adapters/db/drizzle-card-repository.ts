@@ -36,6 +36,38 @@ export class DrizzleCardRepository implements CardRepository {
     };
   }
 
+  async createMany(inputs: CreateCardInput[], userId: string): Promise<Card[]> {
+    if (inputs.length === 0) return [];
+
+    const [deck] = await db
+      .select()
+      .from(decks)
+      .where(and(eq(decks.id, inputs[0].deckId), eq(decks.userId, userId)))
+      .limit(1);
+
+    if (!deck) {
+      throw new Error("Deck not found or unauthorized");
+    }
+
+    const rows = await db
+      .insert(cards)
+      .values(inputs.map((input) => ({
+        deckId: input.deckId,
+        frontText: input.frontText,
+        backText: input.backText,
+      })))
+      .returning();
+
+    return rows.map((row) => ({
+      id: row.id,
+      deckId: row.deckId,
+      frontText: row.frontText,
+      backText: row.backText,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    }));
+  }
+
   async findById(id: string, userId: string): Promise<Card | null> {
     // Find card and join decks to check ownership
     const rows = await db

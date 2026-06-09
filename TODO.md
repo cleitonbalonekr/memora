@@ -3,7 +3,7 @@
 [x] - Add tests
 [x] - /opsx:sync  
 [x] - Move the function approach to a class oriented so we can handle dependencies better
-[ ] - Improve cards creation - bulk creation
+[x] - Improve cards creation - bulk creation
 [ ] - Improve prompt and LLM structured return
 [ ] - Tools - read a link and extract content
 [ ] - Guard against prompt injection***

@@ -45,16 +45,12 @@ export class SaveSelectedDrafts extends AuthedUseCase<
       normalized.push({ frontText, backText });
     }
 
-    // Ownership is enforced per insert by the repository; a non-owned deck throws
-    // on the first create, so nothing is persisted.
-    for (const draft of normalized) {
-      await this.cards.create(
-        { deckId, frontText: draft.frontText, backText: draft.backText },
-        user.id,
-      );
-    }
+    const saved = await this.cards.createMany(
+      normalized.map((d) => ({ deckId, frontText: d.frontText, backText: d.backText })),
+      user.id,
+    );
 
-    return { status: "success", savedCount: normalized.length };
+    return { status: "success", savedCount: saved.length };
   }
 
   protected mapError(error: unknown): SaveDraftsResult {

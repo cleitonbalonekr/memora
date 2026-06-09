@@ -20,6 +20,7 @@ export interface UpdateCardInput {
 
 export interface CardRepository {
   create(input: CreateCardInput, userId: string): Promise<Card>;
+  createMany(inputs: CreateCardInput[], userId: string): Promise<Card[]>;
   findById(id: string, userId: string): Promise<Card | null>;
   listByDeckId(deckId: string, userId: string): Promise<Card[]>;
   update(id: string, userId: string, input: UpdateCardInput): Promise<Card>;
