@@ -7,7 +7,7 @@ import type {
   GenerateDraftsActionResult,
   SaveDraftsActionResult,
 } from "@/app/(app)/decks/[deckId]/generate/actions";
-import type { CardDraft } from "@/ports/ai-card-generator";
+import type { CardDraft } from "@/features/ai/domain/draft-schema";
 import { CARD_SIDE_MAX, validateCard } from "@/features/cards/domain/card-rules";
 import { TextAreaField } from "@/shared/ui/text-area-field";
 

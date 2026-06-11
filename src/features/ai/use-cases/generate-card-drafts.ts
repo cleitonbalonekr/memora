@@ -1,16 +1,14 @@
-import { AiCardGenerator } from "@/ports/ai-card-generator";
+import { LlmClient } from "@/ports/llm-client";
 import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { DeckRepository } from "@/ports/deck-repository";
 import { RateLimiter } from "@/ports/rate-limiter";
 import { AuthedUseCase } from "@/shared/authed-use-case";
+import { draftsResponseSchema } from "@/features/ai/domain/draft-schema";
 import { validateDrafts } from "@/features/ai/domain/draft-validator";
+import { buildGenerationPrompt } from "@/features/ai/domain/prompt-builder";
 import { GenerateDraftsResult, mapGenerateError } from "./draft-errors";
 
-// Upper bound on input size: enough for pasted notes, bounded to keep prompt
-// cost in check (the model output count is capped separately by MAX_DRAFTS).
 export const TOPIC_OR_NOTES_MAX = 5000;
-// Per-request draft cap (design open question: ~10) — also enforced by the
-// validator so the provider can never blow past it.
 export const MAX_DRAFTS = 10;
 
 export interface GenerateCardDraftsInput {
@@ -26,7 +24,7 @@ export class GenerateCardDrafts extends AuthedUseCase<
     auth: AuthGateway,
     private readonly decks: DeckRepository,
     private readonly rateLimiter: RateLimiter,
-    private readonly aiCardGenerator: AiCardGenerator,
+    private readonly llmClient: LlmClient,
   ) {
     super(auth);
   }
@@ -46,8 +44,6 @@ export class GenerateCardDrafts extends AuthedUseCase<
       };
     }
 
-    // Ownership check before any cost is incurred: a deck the user does not own
-    // reads as not_found and never reaches the rate limiter or provider.
     const deck = await this.decks.findById(deckId, user.id);
     if (!deck) {
       return { status: "not_found" };
@@ -62,11 +58,22 @@ export class GenerateCardDrafts extends AuthedUseCase<
       };
     }
 
-    const rawDrafts = await this.aiCardGenerator.generateDrafts({
-      topicOrNotes: trimmed,
-      maxDrafts: MAX_DRAFTS,
+    const prompt = buildGenerationPrompt({ topicOrNotes: trimmed, maxDrafts: MAX_DRAFTS });
+    const result = await this.llmClient.generateStructured({
+      system: prompt.system,
+      user: prompt.user,
+      schema: draftsResponseSchema,
+      temperature: 0.7,
     });
-    return { status: "success", drafts: validateDrafts(rawDrafts, MAX_DRAFTS) };
+
+    if (!result.ok) {
+      return {
+        status: "provider_error",
+        message: "We could not generate cards right now. Try again.",
+      };
+    }
+
+    return { status: "success", drafts: validateDrafts(result.data.drafts, MAX_DRAFTS) };
   }
 
   protected mapError(error: unknown): GenerateDraftsResult {

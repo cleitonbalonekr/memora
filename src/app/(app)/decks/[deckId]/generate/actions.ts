@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getGenerateCardDrafts, getSaveSelectedDrafts } from "@/composition-root";
-import { CardDraft } from "@/ports/ai-card-generator";
+import { CardDraft } from "@/features/ai/domain/draft-schema";
 
 // Serializable results returned to the client review component. deckId is bound
 // server-side (action.bind) so the target deck is never taken from client form

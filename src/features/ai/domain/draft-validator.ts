@@ -1,5 +1,5 @@
 import { validateCard } from "@/features/cards/domain/card-rules";
-import { CardDraft } from "@/ports/ai-card-generator";
+import { CardDraft } from "@/features/ai/domain/draft-schema";
 
 // Normalizes and filters raw model drafts against the shared card rules so a user
 // never sees a draft that cannot be saved (design D4). Trims both sides, drops

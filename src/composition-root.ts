@@ -3,8 +3,8 @@ import { DrizzleCardRepository } from "@/adapters/db/drizzle-card-repository";
 import { DrizzleDeckRepository } from "@/adapters/db/drizzle-deck-repository";
 import { DrizzleUserRepository } from "@/adapters/db/drizzle-user-repository";
 import { InMemoryRateLimiter } from "@/adapters/ai/in-memory-rate-limiter";
-import { OpenRouterCardGenerator } from "@/adapters/ai/openrouter-card-generator";
-import { AiCardGenerator } from "@/ports/ai-card-generator";
+import { OpenRouterLlmClient } from "@/adapters/ai/openrouter-llm-client";
+import { LlmClient } from "@/ports/llm-client";
 import { AuthGateway } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
 import { DeckRepository } from "@/ports/deck-repository";
@@ -67,8 +67,8 @@ export function getRateLimiter(): RateLimiter {
 
 // Constructed lazily so OPENROUTER_API_KEY is only required where AI generation
 // is actually used (the config asserts the key at construction).
-export function getAiCardGenerator(): AiCardGenerator {
-  return new OpenRouterCardGenerator();
+export function getLlmClient(): LlmClient {
+  return new OpenRouterLlmClient();
 }
 
 // Use-case factories: each returns a fresh instance per call so the
@@ -124,7 +124,7 @@ export function getGenerateCardDrafts(): GenerateCardDrafts {
     getAuthGateway(),
     getDeckRepository(),
     getRateLimiter(),
-    getAiCardGenerator(),
+    getLlmClient(),
   );
 }
 

@@ -5,7 +5,7 @@ import type {
   GenerateDraftsActionResult,
   SaveDraftsActionResult,
 } from "@/app/(app)/decks/[deckId]/generate/actions";
-import type { CardDraft } from "@/ports/ai-card-generator";
+import type { CardDraft } from "@/features/ai/domain/draft-schema";
 import { DraftReview } from "./draft-review";
 
 type GenerateAction = (topicOrNotes: string) => Promise<GenerateDraftsActionResult>;

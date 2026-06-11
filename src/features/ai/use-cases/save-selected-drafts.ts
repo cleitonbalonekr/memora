@@ -1,4 +1,4 @@
-import { CardDraft } from "@/ports/ai-card-generator";
+import { CardDraft } from "@/features/ai/domain/draft-schema";
 import { AuthGateway, SessionUser } from "@/ports/auth-gateway";
 import { CardRepository } from "@/ports/card-repository";
 import { AuthedUseCase } from "@/shared/authed-use-case";

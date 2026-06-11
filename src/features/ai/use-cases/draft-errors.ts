@@ -1,4 +1,4 @@
-import { CardDraft } from "@/ports/ai-card-generator";
+import { CardDraft } from "@/features/ai/domain/draft-schema";
 
 // Typed results for the AI use cases, following the existing discriminated-union
 // pattern (cards/use-cases/card-errors). Known failures map to safe messages at
