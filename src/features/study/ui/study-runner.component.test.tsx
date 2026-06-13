@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StudyCard } from "@/features/study/domain/study-session";
@@ -8,6 +8,11 @@ vi.mock("next/link", () => ({
   default: ({ children, ...props }: { children: React.ReactNode }) => (
     <a {...props}>{children}</a>
   ),
+}));
+
+const reviewCardAction = vi.fn().mockResolvedValue({ status: "success" });
+vi.mock("@/app/(app)/decks/[deckId]/study/actions", () => ({
+  reviewCardAction: (input: unknown) => reviewCardAction(input),
 }));
 
 function cards(...ids: string[]): StudyCard[] {
@@ -24,62 +29,65 @@ function renderRunner(deckCards: StudyCard[]) {
   );
 }
 
+async function reveal(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole("button", { name: /reveal answer/i }));
+}
+
 describe("StudyRunner", () => {
-  it("shows the first front and hides the mark actions until reveal", () => {
+  beforeEach(() => {
+    reviewCardAction.mockClear();
+  });
+
+  it("hides the grade actions until the answer is revealed", () => {
     renderRunner(cards("a", "b"));
 
     expect(screen.getByText("front a")).toBeInTheDocument();
     expect(screen.queryByText("back a")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /got it/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /review again/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /medium/i })).not.toBeInTheDocument();
   });
 
-  it("reveals the back and the mark actions when the answer is revealed", async () => {
+  it("reveals the back and the four grading buttons", async () => {
     const user = userEvent.setup();
     renderRunner(cards("a", "b"));
 
-    await user.click(screen.getByRole("button", { name: /reveal answer/i }));
+    await reveal(user);
 
     expect(screen.getByText("back a")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /got it/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /review again/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /don't know/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^hard$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /medium/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /easy/i })).toBeInTheDocument();
   });
 
-  it("advances to the next card and the progress count after Got it", async () => {
+  it("advances and records the grade per press on a passing grade", async () => {
     const user = userEvent.setup();
     renderRunner(cards("a", "b"));
 
     expect(screen.getByText("0 / 2 Cards")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /reveal answer/i }));
-    await user.click(screen.getByRole("button", { name: /got it/i }));
+    await reveal(user);
+    await user.click(screen.getByRole("button", { name: /medium/i }));
 
+    expect(reviewCardAction).toHaveBeenCalledWith({ cardId: "a", grade: "good" });
     expect(screen.getByText("front b")).toBeInTheDocument();
     expect(screen.getByText("1 / 2 Cards")).toBeInTheDocument();
-    // Back of the next card is hidden again until revealed.
-    expect(screen.queryByText("back b")).not.toBeInTheDocument();
   });
 
-  it("re-queues a card to the end after Review again", async () => {
+  it("re-shows the card after Don't know and records again", async () => {
     const user = userEvent.setup();
     renderRunner(cards("a", "b"));
 
-    await user.click(screen.getByRole("button", { name: /reveal answer/i }));
-    await user.click(screen.getByRole("button", { name: /review again/i }));
+    await reveal(user);
+    await user.click(screen.getByRole("button", { name: /don't know/i }));
 
-    // 'a' was sent to the tail, so 'b' is current now and progress is unchanged.
+    expect(reviewCardAction).toHaveBeenCalledWith({ cardId: "a", grade: "again" });
+    // 'a' went to the tail; 'b' is current and progress is unchanged.
     expect(screen.getByText("front b")).toBeInTheDocument();
     expect(screen.getByText("0 / 2 Cards")).toBeInTheDocument();
 
     // Clear 'b', then 'a' returns.
-    await user.click(screen.getByRole("button", { name: /reveal answer/i }));
-    await user.click(screen.getByRole("button", { name: /got it/i }));
+    await reveal(user);
+    await user.click(screen.getByRole("button", { name: /easy/i }));
     expect(screen.getByText("front a")).toBeInTheDocument();
   });
 
@@ -87,8 +95,8 @@ describe("StudyRunner", () => {
     const user = userEvent.setup();
     renderRunner(cards("a"));
 
-    await user.click(screen.getByRole("button", { name: /reveal answer/i }));
-    await user.click(screen.getByRole("button", { name: /got it/i }));
+    await reveal(user);
+    await user.click(screen.getByRole("button", { name: /medium/i }));
 
     expect(screen.getByText("Session complete")).toBeInTheDocument();
     expect(screen.getByText("You cleared 1 card.")).toBeInTheDocument();

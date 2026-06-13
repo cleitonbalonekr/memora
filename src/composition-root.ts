@@ -21,6 +21,7 @@ import { DeleteCard } from "@/features/cards/use-cases/delete-card";
 import { ListCards } from "@/features/cards/use-cases/list-cards";
 import { GetCard } from "@/features/cards/use-cases/get-card";
 import { StartStudySession } from "@/features/study/use-cases/start-study-session";
+import { ReviewCard } from "@/features/study/use-cases/review-card";
 import { GenerateCardDrafts } from "@/features/ai/use-cases/generate-card-drafts";
 import { SaveSelectedDrafts } from "@/features/ai/use-cases/save-selected-drafts";
 import { RegisterUser } from "@/features/auth/use-cases/register-user";
@@ -117,6 +118,10 @@ export function getCard(): GetCard {
 
 export function getStartStudySession(): StartStudySession {
   return new StartStudySession(getAuthGateway(), getCardRepository());
+}
+
+export function getReviewCard(): ReviewCard {
+  return new ReviewCard(getAuthGateway(), getCardRepository());
 }
 
 export function getGenerateCardDrafts(): GenerateCardDrafts {

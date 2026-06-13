@@ -36,7 +36,7 @@ Each decision uses a short record format: context, decision, and consequences.
 
 - **Web layer**: Next.js route handlers, server actions, and React components. Handles HTTP, sessions, input parsing, and rendering. No business rules here.
 - **Application layer**: use cases (one class per user action, for example `CreateCard`, `GenerateCardDrafts`, each exposing a single `execute(input)` method). This layer orchestrates: it validates input, calls the domain where needed, and calls ports for data and external services. See ADR-002 for the class shape and base hierarchy.
-- **Domain layer (thin)**: pure functions and small types that hold real rules. For the MVP this is small: flashcard validation rules, study-session logic, and the AI draft validator.
+- **Domain layer (thin)**: pure, side-effect-free classes and small types that hold real rules. "Pure" here means no I/O and no clock — not "free function": domain logic is modeled as classes too (for example `Scheduler`, `StudySession`), uniform with the use-case shape. For the MVP this is small: flashcard validation rules, study-session logic, and the AI draft validator.
 
 For simple actions the use case body reads like a transaction script: validate, persist, return. That logic is intentionally thin for CRUD — but it lives inside a use-case class (ADR-002), not a free function.
 
@@ -65,6 +65,8 @@ Apply it per feature:
 | Spaced repetition (phase 2) | `AuthedUseCase` | Domain model | Scheduling is genuine domain logic; model it when it arrives |
 
 We do **not** add per-feature intermediate base classes (e.g. `CardUseCase`) yet — only two use cases per feature share a mapper, below the rule-of-three. Revisit if a feature grows many commands.
+
+Domain logic follows the same convention: where a feature has real rules worth modeling, they live in **classes** (for example `Scheduler` and `StudySession` in the study domain), not free functions. These domain classes stay pure — no I/O, no clock; any time-dependence is an injected argument (e.g. `schedule(state, grade, today)`). They are constructed where they are used (a pure domain class is not an external boundary, so it gets no port and no composition-root factory per ADR-003). The judgment about *how much* to model still varies per feature; the *shape* — a class — is uniform across backend logic.
 
 **Consequences.** Engineers do not decide the use-case shape per feature; it is uniform and gives a hook point for future cross-cutting concerns (logging, timing, transactions). We still do not wrap a `Deck` with no behavior in a rich entity just to follow a pattern, and we still isolate the rules that exist so they are unit-testable without a database or a network. Call sites become `getUseCase().execute(input)` (see ADR-003 for the per-call factory rule).
 
@@ -107,7 +109,7 @@ Web  ->  Application (use cases)  ->  Domain
               Ports  <-  Adapters (DB, AI, auth) implement ports
 ```
 
-- The domain layer imports nothing from web, application, or adapters. It is pure.
+- The domain layer imports nothing from web, application, or adapters. It is pure (side-effect-free, no I/O), whether expressed as a class or a small type — "pure" constrains side effects, not the class/function shape.
 - Use cases import the domain and the port interfaces, never adapters.
 - Adapters import ports and implement them. Adapters may import the ORM and SDKs.
 - The web layer imports use cases and composes adapters at the edge.
@@ -217,7 +219,7 @@ These rules apply to all code. They are short on purpose. When two rules seem to
 
 - Strict mode on. No implicit `any`. Prefer precise types over `any` and over wide unions.
 - Make illegal states unrepresentable where it is easy (for example, a discriminated union for a use-case result instead of a loose object).
-- Keep functions pure where you can. Side effects (database, network) belong in adapters and use cases, not in the domain layer.
+- Keep the domain pure. Backend logic is class-based — use cases (ADR-002) and domain rules (ADR-001) are both classes — but domain classes carry no side effects: I/O, the clock, database, and network belong in adapters and use cases, never in the domain layer. Time-dependence enters a domain class as an argument (e.g. an injected `today`), not a read of the system clock.
 - Handle errors explicitly. Do not swallow them.
 
 ### Security rules (from the PRD, SOC2 aligned)

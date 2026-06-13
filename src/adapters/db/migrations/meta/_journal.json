@@ -15,6 +15,13 @@
       "when": 1780441865000,
       "tag": "0001_auth_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781311242028,
+      "tag": "0002_parched_nemesis",
+      "breakpoints": true
     }
   ]
 }

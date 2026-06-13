@@ -1,4 +1,4 @@
-export type StudyOutcome = "got_it" | "review_again";
+import { ReviewGrade } from "./scheduler";
 
 export interface StudyCard {
   id: string;
@@ -6,64 +6,69 @@ export interface StudyCard {
   backText: string;
 }
 
-export interface StudySession {
-  // Remaining cards; the head is the current card. Empty when the session is done.
-  queue: StudyCard[];
-  // Whether the back of the current card is showing.
-  revealed: boolean;
-  // Count of unique cards the session started with (drives the progress total).
-  total: number;
-  // Unique cards cleared with "got it" (drives the progress count).
-  gotItIds: string[];
-}
+// An in-session study run, modeled as an immutable value object: every method
+// returns a new `StudySession` rather than mutating in place. The UI holds it in
+// React state and relies on a fresh identity to re-render, so mutation would
+// silently break rendering. This is pure domain logic — no I/O, no clock.
+export class StudySession {
+  private constructor(
+    // Remaining cards; the head is the current card. Empty when the session is done.
+    private readonly queue: StudyCard[],
+    // Whether the back of the current card is showing.
+    private readonly _revealed: boolean,
+    // Count of unique cards the session started with (drives the progress total).
+    private readonly total: number,
+    // Unique cards cleared with a passing grade (drives the progress count).
+    private readonly clearedIds: string[],
+  ) {}
 
-export function createSession(cards: StudyCard[]): StudySession {
-  return {
-    queue: [...cards],
-    revealed: false,
-    total: cards.length,
-    gotItIds: [],
-  };
-}
-
-export function reveal(session: StudySession): StudySession {
-  if (session.revealed) {
-    return session;
-  }
-  return { ...session, revealed: true };
-}
-
-export function recordResult(
-  session: StudySession,
-  outcome: StudyOutcome,
-): StudySession {
-  const [current, ...rest] = session.queue;
-  if (!current) {
-    return session;
+  static create(cards: StudyCard[]): StudySession {
+    return new StudySession([...cards], false, cards.length, []);
   }
 
-  if (outcome === "got_it") {
-    const gotItIds = session.gotItIds.includes(current.id)
-      ? session.gotItIds
-      : [...session.gotItIds, current.id];
-    return { ...session, queue: rest, revealed: false, gotItIds };
+  get revealed(): boolean {
+    return this._revealed;
   }
 
-  // "review_again": send the current card to the tail so it returns later.
-  return { ...session, queue: [...rest, current], revealed: false };
-}
+  reveal(): StudySession {
+    if (this._revealed) {
+      return this;
+    }
+    return new StudySession(this.queue, true, this.total, this.clearedIds);
+  }
 
-export function currentCard(session: StudySession): StudyCard | null {
-  return session.queue[0] ?? null;
-}
+  recordResult(grade: ReviewGrade): StudySession {
+    const [current, ...rest] = this.queue;
+    if (!current) {
+      return this;
+    }
 
-export function isComplete(session: StudySession): boolean {
-  return session.queue.length === 0;
-}
+    // "again" is the only grade that keeps the card in today's session: send it
+    // to the tail so it returns later. "hard | good | easy" clear it from the queue.
+    if (grade === "again") {
+      return new StudySession(
+        [...rest, current],
+        false,
+        this.total,
+        this.clearedIds,
+      );
+    }
 
-export function progress(session: StudySession): {
-  completed: number;
-  total: number;
-} {
-  return { completed: session.gotItIds.length, total: session.total };
+    const clearedIds = this.clearedIds.includes(current.id)
+      ? this.clearedIds
+      : [...this.clearedIds, current.id];
+    return new StudySession(rest, false, this.total, clearedIds);
+  }
+
+  currentCard(): StudyCard | null {
+    return this.queue[0] ?? null;
+  }
+
+  isComplete(): boolean {
+    return this.queue.length === 0;
+  }
+
+  progress(): { completed: number; total: number } {
+    return { completed: this.clearedIds.length, total: this.total };
+  }
 }
