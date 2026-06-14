@@ -17,3 +17,5 @@
 [ ] - Default prompts for each type of study area (general, language, programming, create your own);
 [ ] - Option to improve unique cards using AI - rate limit of 5 per improvement per day
 [ ] - Search for a free redis service or rate limit implementation
+
+- [ ] - Espaço para anotações de estudos, usar IA para gerar cards a partir das anotações
