@@ -9,15 +9,15 @@ import { DeckList } from "@/features/decks/ui/deck-list";
 const PLACEHOLDER_STATS = [
   {
     label: "Current Streak",
-    value: "14",
-    unit: "days",
+    value: "",
+    unit: "coming soon",
     icon: Flame,
     accent: "text-tertiary",
   },
   {
     label: "Studied Today",
-    value: "42",
-    unit: "cards",
+    value: "",
+    unit: "coming soon",
     icon: CheckCircle2,
     accent: "text-primary",
   },

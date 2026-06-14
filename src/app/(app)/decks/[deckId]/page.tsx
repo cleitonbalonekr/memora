@@ -36,7 +36,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
         </div>
         {cards.length > 0 ? (
           <Link
-            className="flex h-14 w-full items-center justify-center rounded-xl bg-secondary px-md text-headline-sm text-on-secondary shadow-level1 transition hover:bg-secondary-fixed active:scale-95"
+            className="flex h-14 w-full items-center justify-center rounded-xl bg-secondary px-md text-headline-sm text-on-secondary shadow-level1 transition hover:opacity-90 active:scale-95"
             href={`/decks/${deck.id}/study`}
           >
             Study now
