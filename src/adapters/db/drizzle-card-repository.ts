@@ -1,8 +1,8 @@
-import { CardRepository, Card, CreateCardInput, UpdateCardInput } from "@/ports/card-repository";
+import { CardRepository, Card, CreateCardInput, DeckCardStats, UpdateCardInput } from "@/ports/card-repository";
 import { SrsState } from "@/features/study/domain/scheduler";
 import { db } from "./index";
 import { cards, decks } from "./schema";
-import { eq, and, inArray, lte, isNull, sql } from "drizzle-orm";
+import { eq, and, inArray, lte, isNull, or, sql } from "drizzle-orm";
 
 type CardRow = typeof cards.$inferSelect;
 
@@ -118,6 +118,35 @@ export class DrizzleCardRepository implements CardRepository {
       .orderBy(cards.createdAt);
 
     return rows.map(toCard);
+  }
+
+  async statsByUserId(userId: string, today: Date): Promise<DeckCardStats[]> {
+    // One grouped aggregate over the user's cards. "due" counts non-suspended
+    // cards that are due for review (dueDate <= today) or not yet scheduled
+    // (dueDate IS NULL, i.e. new) — mirrors the study-queue definition. The
+    // FILTER predicate is built from column-aware helpers so the Date binds
+    // through Drizzle's timestamp mapping (a raw `${today}` would reach the
+    // driver as an untyped value and fail to serialize).
+    const isDue = and(
+      isNull(cards.suspendedAt),
+      or(isNull(cards.dueDate), lte(cards.dueDate, today)),
+    );
+    const rows = await db
+      .select({
+        deckId: cards.deckId,
+        total: sql<number>`count(*)::int`,
+        due: sql<number>`count(*) filter (where ${isDue})::int`,
+      })
+      .from(cards)
+      .innerJoin(decks, eq(cards.deckId, decks.id))
+      .where(eq(decks.userId, userId))
+      .groupBy(cards.deckId);
+
+    return rows.map((row) => ({
+      deckId: row.deckId,
+      total: row.total,
+      due: row.due,
+    }));
   }
 
   async listDueForStudy(

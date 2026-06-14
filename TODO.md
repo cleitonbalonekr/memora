@@ -5,8 +5,9 @@
 [x] - Move the function approach to a class oriented so we can handle dependencies better
 [x] - Improve cards creation - bulk creation
 [x] - Improve LLM structured return
-[ ] - Add the repetição espacada (spaced repetition) feature
-    - [ ] Domain entities as classes
+[x] - Add the repetição espacada (spaced repetition) feature
+    - [x] Domain entities as classes
+- [ ] Update dashboard with real data and add icon customization to decks
 [ ] - Refact UI elements placement - learn next api folder (Create Server)?
 [ ] - Improve UI apparence
 [ ] - Tools - read a link and extract content

@@ -24,27 +24,25 @@ export default async function EditCardPage({ params }: EditCardPageProps) {
   const deleteAction = deleteCardAction.bind(null, deckId, card.id);
 
   return (
-    <main className="min-h-dvh bg-surface px-margin-mobile py-lg text-on-surface">
-      <div className="mx-auto flex w-full max-w-[600px] flex-col gap-lg">
-        <header className="flex flex-col gap-xs">
-          <Link
-            className="text-label-md text-primary hover:underline"
-            href={`/decks/${deckId}`}
-          >
-            ← Back to deck
-          </Link>
-          <h1 className="text-headline-md">Edit card</h1>
-        </header>
+    <>
+      <header className="flex flex-col gap-xs">
+        <Link
+          className="text-label-md text-primary hover:underline"
+          href={`/decks/${deckId}`}
+        >
+          ← Back to deck
+        </Link>
+        <h1 className="text-headline-md">Edit card</h1>
+      </header>
 
-        <CardForm
-          action={action}
-          defaultValues={{ front: card.frontText, back: card.backText }}
-          pendingLabel="Saving..."
-          submitLabel="Save changes"
-        />
+      <CardForm
+        action={action}
+        defaultValues={{ front: card.frontText, back: card.backText }}
+        pendingLabel="Saving..."
+        submitLabel="Save changes"
+      />
 
-        <DeleteCardButton action={deleteAction} />
-      </div>
-    </main>
+      <DeleteCardButton action={deleteAction} />
+    </>
   );
 }

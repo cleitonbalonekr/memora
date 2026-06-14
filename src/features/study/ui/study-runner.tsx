@@ -67,53 +67,51 @@ export function StudyRunner({ deckId, deckTitle, cards }: StudyRunnerProps) {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col bg-surface px-margin-mobile py-lg text-on-surface">
-      <div className="mx-auto flex w-full max-w-[600px] flex-1 flex-col gap-lg">
-        <header className="flex items-center justify-between gap-md">
-          <Link
-            aria-label="Close study session"
-            className="text-label-md text-on-surface-variant hover:text-primary"
-            href={`/decks/${deckId}`}
-          >
-            Close
-          </Link>
-          <h1 className="truncate text-headline-sm text-on-surface">{deckTitle}</h1>
-          <span className="w-10" aria-hidden />
-        </header>
+    <>
+      <header className="flex items-center justify-between gap-md">
+        <Link
+          aria-label="Close study session"
+          className="text-label-md text-on-surface-variant hover:text-primary"
+          href={`/decks/${deckId}`}
+        >
+          Close
+        </Link>
+        <h1 className="truncate text-headline-sm text-on-surface">{deckTitle}</h1>
+        <span className="w-10" aria-hidden />
+      </header>
 
-        <StudyProgress completed={completed} total={total} />
+      <StudyProgress completed={completed} total={total} />
 
-        {session.isComplete() || !card ? (
-          <SessionComplete
-            clearedCount={completed}
-            deckId={deckId}
-            onRestart={() => setSession(StudySession.create(cards))}
+      {session.isComplete() || !card ? (
+        <SessionComplete
+          clearedCount={completed}
+          deckId={deckId}
+          onRestart={() => setSession(StudySession.create(cards))}
+        />
+      ) : (
+        <>
+          <StudyCard
+            card={card}
+            onReveal={() => setSession(session.reveal())}
+            revealed={session.revealed}
           />
-        ) : (
-          <>
-            <StudyCard
-              card={card}
-              onReveal={() => setSession(session.reveal())}
-              revealed={session.revealed}
-            />
-            {session.revealed ? (
-              <div className="grid grid-cols-2 gap-md">
-                {GRADES.map(({ grade, label, className }) => (
-                  <button
-                    key={grade}
-                    className={`flex h-14 items-center justify-center rounded-xl px-md text-headline-sm transition active:scale-95 disabled:opacity-60 ${className}`}
-                    disabled={isPending}
-                    onClick={() => handleGrade(grade)}
-                    type="button"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </>
-        )}
-      </div>
-    </main>
+          {session.revealed ? (
+            <div className="grid grid-cols-2 gap-md">
+              {GRADES.map(({ grade, label, className }) => (
+                <button
+                  key={grade}
+                  className={`flex h-14 items-center justify-center rounded-xl px-md text-headline-sm transition active:scale-95 disabled:opacity-60 ${className}`}
+                  disabled={isPending}
+                  onClick={() => handleGrade(grade)}
+                  type="button"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </>
+      )}
+    </>
   );
 }

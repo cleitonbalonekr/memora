@@ -19,28 +19,26 @@ export default async function EditDeckPage({ params }: EditDeckPageProps) {
   const action = updateDeckAction.bind(null, deck.id);
 
   return (
-    <main className="min-h-dvh bg-surface px-margin-mobile py-lg text-on-surface">
-      <div className="mx-auto flex w-full max-w-[600px] flex-col gap-lg">
-        <header className="flex flex-col gap-xs">
-          <Link
-            className="text-label-md text-primary hover:underline"
-            href={`/decks/${deck.id}`}
-          >
-            ← Back to deck
-          </Link>
-          <h1 className="text-headline-md">Edit deck</h1>
-        </header>
+    <>
+      <header className="flex flex-col gap-xs">
+        <Link
+          className="text-label-md text-primary hover:underline"
+          href={`/decks/${deck.id}`}
+        >
+          ← Back to deck
+        </Link>
+        <h1 className="text-headline-md">Edit deck</h1>
+      </header>
 
-        <DeckForm
-          action={action}
-          defaultValues={{
-            title: deck.title,
-            description: deck.description ?? undefined,
-          }}
-          pendingLabel="Saving..."
-          submitLabel="Save changes"
-        />
-      </div>
-    </main>
+      <DeckForm
+        action={action}
+        defaultValues={{
+          title: deck.title,
+          description: deck.description ?? undefined,
+        }}
+        pendingLabel="Saving..."
+        submitLabel="Save changes"
+      />
+    </>
   );
 }

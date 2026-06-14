@@ -1,7 +1,7 @@
-import { Deck } from "@/ports/deck-repository";
+import { DeckSummary } from "@/features/decks/use-cases/list-decks";
 import { DeckCard } from "./deck-card";
 
-export function DeckList({ decks }: { decks: Deck[] }) {
+export function DeckList({ decks }: { decks: DeckSummary[] }) {
   return (
     <ul className="flex flex-col gap-sm">
       {decks.map((deck) => (

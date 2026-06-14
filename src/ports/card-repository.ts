@@ -27,11 +27,24 @@ export interface UpdateCardInput {
   backText?: string;
 }
 
+// Per-deck card counts for an owned deck: total cards and how many are
+// currently "due" (non-suspended cards that are due for review or not yet
+// scheduled). Drives the deck card's progress/due indicators from real SRS
+// state rather than a placeholder.
+export interface DeckCardStats {
+  deckId: string;
+  total: number;
+  due: number;
+}
+
 export interface CardRepository {
   create(input: CreateCardInput, userId: string): Promise<Card>;
   createMany(inputs: CreateCardInput[], userId: string): Promise<Card[]>;
   findById(id: string, userId: string): Promise<Card | null>;
   listByDeckId(deckId: string, userId: string): Promise<Card[]>;
+  // Aggregate card counts per deck for the acting user, in one query. Decks
+  // with no cards are omitted from the result (callers default them to zero).
+  statsByUserId(userId: string, today: Date): Promise<DeckCardStats[]>;
   // Builds a day's study queue for an owned deck: due, non-suspended reviews
   // (dueDate <= today, most-overdue first) plus up to the remaining new-card
   // allowance for today (dueDate IS NULL, non-suspended, by createdAt).

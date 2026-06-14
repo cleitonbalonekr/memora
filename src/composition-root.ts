@@ -89,7 +89,11 @@ export function getDeleteDeck(): DeleteDeck {
 }
 
 export function getListDecks(): ListDecks {
-  return new ListDecks(getAuthGateway(), getDeckRepository());
+  return new ListDecks(
+    getAuthGateway(),
+    getDeckRepository(),
+    getCardRepository(),
+  );
 }
 
 export function getDeck(): GetDeck {

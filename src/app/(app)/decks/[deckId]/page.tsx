@@ -21,64 +21,62 @@ export default async function DeckPage({ params }: DeckPageProps) {
   const deleteAction = deleteDeckAction.bind(null, deck.id);
 
   return (
-    <main className="min-h-dvh bg-surface px-margin-mobile py-lg text-on-surface">
-      <div className="mx-auto flex w-full max-w-[600px] flex-col gap-lg">
-        <header className="flex flex-col gap-md">
-          <Link className="text-label-md text-primary hover:underline" href="/decks">
-            ← Back to decks
-          </Link>
-          <div>
-            <h1 className="text-display-lg-mobile text-on-surface">{deck.title}</h1>
-            {deck.description ? (
-              <p className="mt-xs text-body-md text-on-surface-variant">
-                {deck.description}
-              </p>
-            ) : null}
-          </div>
-          {cards.length > 0 ? (
-            <Link
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-secondary px-md text-headline-sm text-on-secondary shadow-level1 transition hover:bg-secondary-fixed active:scale-95"
-              href={`/decks/${deck.id}/study`}
-            >
-              Study now
-            </Link>
+    <>
+      <header className="flex flex-col gap-md">
+        <Link className="text-label-md text-primary hover:underline" href="/decks">
+          ← Back to decks
+        </Link>
+        <div>
+          <h1 className="text-display-lg-mobile text-on-surface">{deck.title}</h1>
+          {deck.description ? (
+            <p className="mt-xs text-body-md text-on-surface-variant">
+              {deck.description}
+            </p>
           ) : null}
-          <div className="flex gap-md">
-            <Link
-              className="flex h-12 flex-1 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
-              href={`/decks/${deck.id}/edit`}
-            >
-              Edit deck
-            </Link>
-            <div className="flex-1">
-              <DeleteDeckButton action={deleteAction} deckTitle={deck.title} />
-            </div>
+        </div>
+        {cards.length > 0 ? (
+          <Link
+            className="flex h-14 w-full items-center justify-center rounded-xl bg-secondary px-md text-headline-sm text-on-secondary shadow-level1 transition hover:bg-secondary-fixed active:scale-95"
+            href={`/decks/${deck.id}/study`}
+          >
+            Study now
+          </Link>
+        ) : null}
+        <div className="flex gap-md">
+          <Link
+            className="flex h-12 flex-1 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
+            href={`/decks/${deck.id}/edit`}
+          >
+            Edit deck
+          </Link>
+          <div className="flex-1">
+            <DeleteDeckButton action={deleteAction} deckTitle={deck.title} />
           </div>
-        </header>
+        </div>
+      </header>
 
-        <section className="flex flex-col gap-md">
-          <div className="flex items-center justify-between gap-md">
-            <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
-              All cards
-            </h2>
-            <div className="flex gap-sm">
-              <Link
-                className="flex h-10 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
-                href={`/decks/${deck.id}/generate`}
-              >
-                Generate with AI
-              </Link>
-              <Link
-                className="flex h-10 items-center justify-center rounded-xl bg-primary px-md text-label-md text-on-primary shadow-level1 transition hover:bg-surface-tint"
-                href={`/decks/${deck.id}/cards/new`}
-              >
-                Add card
-              </Link>
-            </div>
+      <section className="flex flex-col gap-md">
+        <div className="flex items-center justify-between gap-md">
+          <h2 className="text-label-sm uppercase tracking-wider text-on-surface-variant">
+            All cards
+          </h2>
+          <div className="flex gap-sm">
+            <Link
+              className="flex h-10 items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-md text-label-md text-primary transition hover:bg-surface-container-low"
+              href={`/decks/${deck.id}/generate`}
+            >
+              Generate with AI
+            </Link>
+            <Link
+              className="flex h-10 items-center justify-center rounded-xl bg-primary px-md text-label-md text-on-primary shadow-level1 transition hover:bg-surface-tint"
+              href={`/decks/${deck.id}/cards/new`}
+            >
+              Add card
+            </Link>
           </div>
-          <CardList cards={cards} />
-        </section>
-      </div>
-    </main>
+        </div>
+        <CardList cards={cards} />
+      </section>
+    </>
   );
 }
